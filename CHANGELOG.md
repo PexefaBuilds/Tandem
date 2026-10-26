@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+- Fix: the Session start window is wider, so everything fits at the default window size.
+- Fix: the sidebar showed a fixed "0.1" under the logo. It now shows the real version.
+
 ## 1.2.0
 - New: "Update now" in Settings downloads the new version, checks its signature, installs it over the current copy (no uninstall) and restarts Tandem. Windows and macOS. Installs older than 1.2.0 need one manual install of this version first.
 
