@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+- Fix: the "Download" button after "Check for updates" was blocked and did nothing. It now opens the release page.
+- Fix: the built-in app icon (taskbar, pinned shortcut, tray at launch) is now the dark tile, so it is visible on dark taskbars.
+
 ## 1.0.1
 - Fix: profiles that were open during a scan could not be ticked after you closed them. Rescanning now updates them, and a new Refresh button re-checks which profiles are still open.
 - Fix: "Scan this computer" could run for minutes on a slow drive. It now stops after about 14 seconds and the progress estimate matches.
