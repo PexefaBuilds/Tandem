@@ -1,6 +1,6 @@
 # Tandem: work plan and progress
 
-Work only in `D:\Claude-Related\ClaudeFiles_Personal\Tandem`. The `G:` shared-drive copy is an old snapshot (no source, no `WORK_PLAN.md`); ignore it. Not a git repo yet; owner said to push to GitHub only when the app is done and tested.
+Work only in `D:\Claude-Related\ClaudeFiles_Personal\Tandem`. The `G:` shared-drive copy is an old snapshot (no source, no `WORK_PLAN.md`); ignore it. Git repo, public at https://github.com/PexefaBuilds/Tandem (branch `main`, tags v1.0.0 to v1.0.2). Push only as PexefaBuilds (see Gotchas).
 
 ## Done
 - **M0** shell, **M1** desktop profiles, **M2** sign-in and import (details in `docs/BUILD-PLAN.md`). Owner's real profiles (FS_Work, FD_Work, Personal(shahid-builds)) are in `%APPDATA%\Tandem`.
@@ -26,13 +26,23 @@ Work only in `D:\Claude-Related\ClaudeFiles_Personal\Tandem`. The `G:` shared-dr
 - History is indexed by polling (open page + every minute) instead of a file watcher: simpler, and enough for chats that change slowly.
 
 ## Current task
-M7 and M8 built (owner said "go"). Mac code lives in `src-tauri/src/platform/macos.rs` plus `cfg(target_os="macos")` branches in engine, terminal, signin, usage, tray, lib. Compiles and `cargo test` passes on the Mac over ssh (synced to `~/ShahidPersonalProjects/Tandem`); nothing was run against the real Mac apps. Version is 1.0.0, `CHANGELOG.md` and `.github/workflows/release.yml` exist, `UPDATE_REPO` = `PexefaBuilds/Tandem`. Private GitHub repo `PexefaBuilds/Tandem` was created by an agent with an initial commit; later edits are uncommitted.
+M0 to M8 are built and **v1.0.2 is released** (public repo https://github.com/PexefaBuilds/Tandem; assets: Windows .exe/.msi from CI, universal Mac .dmg built by hand). Nothing is in flight. Mac code: `src-tauri/src/platform/macos.rs` plus `cfg(target_os="macos")` branches in engine, terminal, signin, usage, tray, lib. It compiles and passes `cargo test` on the Mac but has never run against the real Mac Claude/Codex apps.
+
+## Release history
+- 1.0.0 first release. 1.0.1: import scan runs on a thread with a hard ~14 s wait, rescans update stale "in use" state, new Refresh button (`recheck_in_use`). 1.0.2: opener permission allows only `https://github.com/PexefaBuilds/Tandem/**` (the update "Download" button was blocked), built-in icons regenerated from the dark tile (`pnpm tauri icon public/icon-dark.png`; delete the android/ios folders it makes).
+
+## How to release (Windows from CI, Mac by hand)
+1. Bump version in `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json`; add a `CHANGELOG.md` entry; `cargo test`, `pnpm lint`.
+2. Commit as PexefaBuilds, push, `git tag vX.Y.Z && git push origin vX.Y.Z`. The Release workflow builds Windows into a DRAFT release (~10 min). The workflow has no macOS job on purpose (GitHub's macOS runners queued 15+ min and failed).
+3. Mac (the folder there is only a synced copy, never edit it; `rm -rf` wipes its build cache, so the first build takes a few minutes): `git archive HEAD | ssh mac 'rm -rf ~/ShahidPersonalProjects/Tandem && mkdir -p ~/ShahidPersonalProjects/Tandem && cd ~/ShahidPersonalProjects/Tandem && tar xf -'`, then over ssh with `export PATH=$HOME/.local/node/bin:$HOME/.cargo/bin:$PATH`: `pnpm install --frozen-lockfile && pnpm tauri build --target universal-apple-darwin --bundles app`. `--bundles dmg` fails over ssh (needs GUI), so make the dmg with `hdiutil create -volname Tandem -srcfolder <dir with Tandem.app + Applications symlink> -format UDZO`, `scp` it back.
+4. `gh release upload vX.Y.Z <dmg>`, then `gh release edit vX.Y.Z --draft=false --latest --notes ...` (notes say Windows unsigned, Mac experimental/untested).
 
 ## Next steps
-1. Owner on a Mac: launch a profile, check Keychain prompt and usage, menu bar item, Terminal/iTerm/Ghostty, Cmd+, Settings, Dock reopen. Verify `open --env` passes Codex env vars and that Claude Code `CLAUDE_CONFIG_DIR` isolates the Keychain.
-2. Owner: `pnpm tauri signer generate` (keep the private key), then wire `tauri-plugin-updater` with the pubkey; add Apple/SignPath secrets for signed builds; README screenshots.
-3. Commit and push current changes when the owner agrees; tag `v1.0.0` to run the release workflow; make the repo public when ready.
-4. Mac gaps: desktop shortcuts are Windows-only; usage session cache on disk is Windows-only (Mac reads the live cookie file).
+0. This PC has Tandem 1.0.0 installed (`%LOCALAPPDATA%\Tandem`) and `src-tauri/target/release/bundle` holds only 1.0.0 installers; install 1.0.2 from the GitHub release. The owner's second PC (user `Shahid`) is where the scan/update bugs showed up.
+1. Owner tests 1.0.2 on the other PC: Refresh button, scan time, update Download button, taskbar icon (pinned vs tray if still white).
+2. Owner on a Mac: launch a profile, Keychain prompt and usage, menu-bar item, Terminal/iTerm/Ghostty, Cmd+, Settings, Dock reopen. Verify `open --env` passes Codex env vars and that Claude Code `CLAUDE_CONFIG_DIR` isolates the Keychain.
+3. Owner: `pnpm tauri signer generate` (keep the private key), then wire `tauri-plugin-updater`; Apple/SignPath signing; README screenshots.
+4. Mac gaps: desktop shortcuts are Windows-only; usage session cache on disk is Windows-only.
 
 ## Open questions
 - Personal account plan label (Pro): confirm it shows after the capabilities fallback. If not, inspect the organization JSON (never print cookies).
@@ -43,10 +53,13 @@ M7 and M8 built (owner said "go"). Mac code lives in `src-tauri/src/platform/mac
 ## Untested / hand-test list
 - Tray icon click and position, hotkey press, open at login (touches registry; classifier blocks it), desktop shortcut launching a profile.
 - Closing and deleting running profiles, rename-on-relaunch, multi-profile launch (a script that kills Claude processes is blocked by the permission classifier; owner may test by hand).
-- Real sign-in of a new account, Codex everything (not installed), macOS, a real ChatGPT export, huge `conversations.json` (read fully into memory), CI on GitHub.
+- Real sign-in of a new account, Codex everything (not installed), macOS, a real ChatGPT export, huge `conversations.json` (read fully into memory). GitHub CI (`ci.yml`) is Windows-only now and passes; the release workflow works for Windows.
 - Two Personal cookie files (`Network\Cookies`, `Cookies-journal`) were not copied into the real `%APPDATA%\Tandem` (the profile was open). Copy from `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Tandem\ClaudeProfiles\Personal(shahid-builds)\Network` when it is closed (use a non-virtualized process, see gotchas). Command, run through `Invoke-CimMethod Win32_Process Create`: `robocopy "<Packages path>\Tandem" "C:\Users\_Admin\AppData\Roaming\Tandem" /E /XC /XN /XO` (copy only, never overwrites).
 
 ## Gotchas
+- **GitHub identity:** all commits and pushes must be PexefaBuilds (`PexefaBuilds <340620140+PexefaBuilds@users.noreply.github.com>`, set locally in this repo). The global git config on this PC is the owner's brother's; never use it. History was reset once to remove it. `gh` has the `delete_repo` scope now (owner can revoke).
+- Mac builds go through `ssh mac` (see How to release). Shell collapses `\` in heredocs, so use the Edit tool for Rust strings with backslashes.
+- Killing `tandem.exe` is needed before `pnpm tauri build` (exe locked); tell the owner.
 - **MSIX file virtualization:** anything launched from inside the Claude desktop app (including this Claude Code session's shell) writes `%APPDATA%` files into `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\...`. A Tandem started that way saves profiles there and a normally launched Tandem sees an empty `%APPDATA%\Tandem`. To test the real exe use `TANDEM_DATA_DIR=.devdata` (outside AppData), or start it via `Invoke-CimMethod Win32_Process Create` (not virtualized). Owner's data was copied to the real folder on 2026-10-26 (2 GB); two Personal cookie files may still need copying from the Packages path.
 - Shell tool collapses `\\` in heredocs: write Windows paths with `/` in scripts, and use the Edit tool for Rust `'\\'` literals.
 - `corepack enable` fails (no admin); pnpm installed via `npm i -g pnpm`; add `/c/Users/_Admin/AppData/Roaming/npm` to PATH.

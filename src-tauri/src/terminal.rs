@@ -118,6 +118,45 @@ pub fn open(app: &App, name: &str, folder: &Path, s: &Settings, login: bool) -> 
     start(app, name, folder, s, run, None)
 }
 
+/// Sends one message through the Claude Code CLI (`claude -p`) signed in as the profile in `folder`, and waits for it to finish.
+/// API-key variables are removed so the plan's login is used, never a paid API key. Errors are fixed text.
+pub fn run_prompt(folder: &Path, message: &str) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    let mut c = {
+        use crate::platform::macos::sq;
+        let script = format!("export CLAUDE_CONFIG_DIR={}; unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN; claude -p {}", sq(&folder.to_string_lossy()), sq(message));
+        let mut c = Command::new("/bin/zsh");
+        c.args(["-lc", &script]);
+        c
+    };
+    #[cfg(not(target_os = "macos"))]
+    let mut c = {
+        let script = format!(
+            "$env:CLAUDE_CONFIG_DIR='{}'; foreach($v in 'ANTHROPIC_API_KEY','ANTHROPIC_AUTH_TOKEN'){{ Remove-Item \"Env:$v\" -ErrorAction SilentlyContinue }}; claude -p '{}'; exit $LASTEXITCODE",
+            q(&folder.to_string_lossy()),
+            q(message)
+        );
+        let utf16: Vec<u8> = script.encode_utf16().flat_map(|u| u.to_le_bytes()).collect();
+        let mut c = Command::new("powershell.exe");
+        c.args(["-NoLogo", "-NonInteractive", "-EncodedCommand", &B64.encode(utf16)]);
+        c
+    };
+    hidden(&mut c);
+    let mut child = c.stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null()).spawn().map_err(|_| "Couldn't run Claude Code.".to_string())?;
+    let start = Instant::now();
+    loop {
+        match child.try_wait() {
+            Ok(Some(s)) if s.success() => return Ok(()),
+            Ok(Some(_)) => return Err("Claude Code didn't send it. Check that the profile is signed in and you're online.".into()),
+            Ok(None) if start.elapsed().as_secs() < 120 => std::thread::sleep(std::time::Duration::from_millis(500)),
+            _ => {
+                let _ = child.kill();
+                return Err("Claude Code took too long to answer.".into());
+            }
+        }
+    }
+}
+
 /// Resumes a past session in its own folder. `sid` must already be checked to be letters, digits and dashes.
 pub fn resume(app: &App, root: &Path, s: &Settings, sid: &str, cwd: Option<&str>) -> Result<(), String> {
     let run = if app.key == "cc" { format!("claude --resume {sid}") } else { format!("codex resume {sid}") };

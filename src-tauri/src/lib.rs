@@ -478,9 +478,19 @@ fn set_tray_icon(handle: tauri::AppHandle, dark: bool) {
     tray::set_icon(&handle, dark);
 }
 
-/// BETA. Saves a profile's session start schedule.
+fn check_route(route: &str, terminal: &str) -> Res<()> {
+    match route {
+        "web" => Ok(()),
+        "terminal" if store::load_meta().profiles.iter().any(|m| m.app == "cc" && m.name == terminal) => Ok(()),
+        "terminal" => Err("Pick a Claude Code profile.".into()),
+        _ => Err("Unknown route.".into()),
+    }
+}
+
+/// Saves a profile's session start schedule.
 #[tauri::command]
-fn save_schedule(app: String, name: String, enabled: bool, time: String, repeat: String, message: String) -> Res<()> {
+fn save_schedule(app: String, name: String, enabled: bool, time: String, repeat: String, message: String, route: String, terminal: String) -> Res<()> {
+    check_route(&route, &terminal)?;
     if app != "claude" || !store::load_meta().profiles.iter().any(|m| m.app == app && m.name == name) {
         return Err("Profile not found".into());
     }
@@ -502,17 +512,18 @@ fn save_schedule(app: String, name: String, enabled: bool, time: String, repeat:
             if s.time != time || (enabled && !s.enabled) {
                 s.last_day.clear();
             }
-            (s.enabled, s.time, s.repeat, s.message) = (enabled, time, repeat, message);
+            (s.enabled, s.time, s.repeat, s.message, s.route, s.terminal) = (enabled, time, repeat, message, route, terminal);
         }
-        None => f.schedules.push(store::Schedule { app, name, enabled, time, repeat, message, ..Default::default() }),
+        None => f.schedules.push(store::Schedule { app, name, enabled, time, repeat, message, route, terminal, ..Default::default() }),
     }
     store::save_schedules(&f)
 }
 
 /// BETA. Sends the schedule's message right now; the user asked for it by pressing the button.
 #[tauri::command]
-async fn send_session_now(app: String, name: String, message: String) -> Res<()> {
-    schedule::send_and_record(&app, &name, message.trim()).await
+async fn send_session_now(app: String, name: String, message: String, route: String, terminal: String) -> Res<()> {
+    check_route(&route, &terminal)?;
+    schedule::send_and_record(&app, &name, message.trim(), &route, &terminal).await
 }
 
 #[tauri::command]

@@ -151,7 +151,7 @@ export default function App() {
       </div>
       {sheet?.kind === "recover" && <Recover onDone={done} />}
       {sheet?.kind === "signin" && <SignIn p={sheet.p} onClose={() => setSheet(null)} onDone={done} onLaunch={(p) => api.launch(p.app, p.name).then(reload).catch((e) => toast(errText(e)))} />}
-      {sheet?.kind === "session" && state && <SessionStart p={sheet.p} schedule={state.schedules.find((s) => s.app === sheet.p.app && s.name === sheet.p.name)} onClose={() => setSheet(null)} onDone={done} />}
+      {sheet?.kind === "session" && state && <SessionStart p={sheet.p} account={usage.find((u) => u.app === sheet.p.app && u.name === sheet.p.name)?.account || ""} cliFound={!!state.apps.find((x) => x.key === "cc")?.installed} terminals={state.profiles.filter((x) => x.app === "cc" && x.signedIn)} schedule={state.schedules.find((s) => s.app === sheet.p.app && s.name === sheet.p.name)} onClose={() => setSheet(null)} onDone={done} />}
       {sheet?.kind === "tsignin" && state && <TerminalSignIn p={sheet.p} live={state.profiles.find((x) => x.app === sheet.p.app && x.name === sheet.p.name)} onClose={() => setSheet(null)} onDone={done} />}
       {sheet?.kind === "import" && state && <ImportSheet installed={installed(state)} onClose={() => setSheet(null)} onDone={done} />}
       {state && !state.settings.welcomeDone && <Welcome state={state} onFinish={finishWelcome} />}

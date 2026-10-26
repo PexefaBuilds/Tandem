@@ -138,6 +138,10 @@ pub struct Schedule {
     /// "daily" | "once"
     pub repeat: String,
     pub message: String,
+    /// "terminal" (Claude Code CLI) | "web" (claude.ai route). Empty = web, from before this option existed.
+    pub route: String,
+    /// Name of the Claude Code profile used by the terminal route.
+    pub terminal: String,
     /// Unix seconds of the last message that went through; 0 = never.
     pub last_sent: u64,
     /// "" | "sent" | "failed" | "missed"

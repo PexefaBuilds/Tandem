@@ -30,7 +30,7 @@ export function scheduleLine(s: Schedule | undefined): string {
   return `Session starts ${clock(n)} · in ${left}`;
 }
 
-export function SessionStart({ p, schedule, onClose, onDone }: { p: Profile; schedule: Schedule | undefined; onClose: () => void; onDone: (m: string) => void }) {
+export function SessionStart({ p, schedule, account, cliFound, terminals, onClose, onDone }: { p: Profile; schedule: Schedule | undefined; account: string; cliFound: boolean; terminals: Profile[]; onClose: () => void; onDone: (m: string) => void }) {
   const [enabled, setEnabled] = useState(schedule?.enabled ?? true);
   const [time, setTime] = useState(schedule?.time || "08:00");
   const [repeat, setRepeat] = useState(schedule?.repeat || "daily");
@@ -38,18 +38,24 @@ export function SessionStart({ p, schedule, onClose, onDone }: { p: Profile; sch
   const [err, setErr] = useState("");
   const [sending, setSending] = useState(false);
   const [note, setNote] = useState("");
+  const canTerminal = cliFound && terminals.length > 0;
+  // New schedules start on the terminal route when it can run; saved ones keep their route (older ones used the web).
+  const [route, setRoute] = useState(schedule ? (schedule.route || "web") : canTerminal ? "terminal" : "web");
+  const [term, setTerm] = useState(schedule?.terminal || (terminals.find((t) => account && t.account === account) || terminals[0])?.name || "");
+  const viaTerminal = route === "terminal" && canTerminal;
+  const why = !cliFound ? "Claude Code isn’t installed on this PC." : "No Claude Code profile is signed in.";
 
   const [h, m] = (time || "00:00").split(":").map(Number);
   const start = new Date();
   start.setHours(h || 0, m || 0, 0, 0);
   const end = new Date(start.getTime() + FIVE_H);
 
-  const save = () => api.saveSchedule(p.app, p.name, enabled, time, repeat, message).then(() => onDone(enabled ? "Session start saved" : "Session start turned off")).catch((e) => setErr(errText(e)));
+  const save = () => api.saveSchedule(p.app, p.name, enabled, time, repeat, message, viaTerminal ? "terminal" : "web", term).then(() => onDone(enabled ? "Session start saved" : "Session start turned off")).catch((e) => setErr(errText(e)));
   const sendNow = () => {
     setSending(true);
     setNote("");
-    api.sendSessionNow(p.app, p.name, message)
-      .then(() => setNote("Sent. A new chat was started and your 5-hour window has begun."))
+    api.sendSessionNow(p.app, p.name, message, viaTerminal ? "terminal" : "web", term)
+      .then(() => setNote("Sent. Your 5-hour window has begun."))
       .catch((e) => setNote(`Didn't go through: ${errText(e)}`))
       .finally(() => setSending(false));
   };
@@ -58,8 +64,29 @@ export function SessionStart({ p, schedule, onClose, onDone }: { p: Profile; sch
 
   return (
     <Sheet title={`Session start · ${p.name}`} onClose={onClose}>
-      <div style={{ marginTop: 10 }}><span style={{ fontSize: 11, fontWeight: 600, letterSpacing: ".06em", padding: "2px 8px", borderRadius: 999, background: "var(--tint-amber-bg)", color: "var(--tint-amber-ink)" }}>BETA</span></div>
-      <div style={{ margin: "12px 0 0", padding: 12, borderRadius: 8, background: "var(--raised)", fontSize: 13, lineHeight: 1.5, color: "var(--muted)" }}>
+      <div style={{ margin: "14px 0 0", fontSize: 13, fontWeight: 500 }}>How to send it</div>
+      <div role="radiogroup" aria-label="How to send it" style={{ display: "grid", gap: 8, marginTop: 8 }}>
+        <label style={{ display: "flex", gap: 10, padding: 12, borderRadius: 8, background: "var(--raised)", opacity: canTerminal ? 1 : 0.55, cursor: canTerminal ? "pointer" : "not-allowed" }}>
+          <input type="radio" name="route" disabled={!canTerminal} checked={viaTerminal} onChange={() => setRoute("terminal")} />
+          <span style={{ fontSize: 13, lineHeight: 1.5 }}>
+            <b>Claude Code (recommended)</b>
+            <span style={{ display: "block", color: "var(--muted)" }}>Uses Claude Code’s own supported command, signed in as one of your terminal profiles. It uses your plan’s login (never an API key), starts the same 5-hour window, and is far less likely to break than the web route.</span>
+            {!canTerminal && <span style={{ display: "block", color: "var(--muted)", marginTop: 4 }}>Unavailable: {why} Sign a Claude Code profile in from the Profiles screen to turn this on.</span>}
+            {canTerminal && <select aria-label="Claude Code profile" className="field" style={{ marginTop: 8 }} value={term} onChange={(e) => setTerm(e.target.value)}>
+              {terminals.map((t) => <option key={t.name} value={t.name}>{t.name}{t.account ? ` · ${t.account}` : ""}</option>)}
+            </select>}
+          </span>
+        </label>
+        <label style={{ display: "flex", gap: 10, padding: 12, borderRadius: 8, background: "var(--raised)", cursor: "pointer" }}>
+          <input type="radio" name="route" checked={!viaTerminal} onChange={() => setRoute("web")} />
+          <span style={{ fontSize: 13, lineHeight: 1.5 }}><b>Web route (beta)</b><span style={{ display: "block", color: "var(--muted)" }}>Uses this profile’s claude.ai sign-in and an unofficial route. Works without Claude Code, but it can stop working at any time.</span></span>
+        </label>
+      </div>
+      {!viaTerminal && <div style={{ marginTop: 10 }}><span style={{ fontSize: 11, fontWeight: 600, letterSpacing: ".06em", padding: "2px 8px", borderRadius: 999, background: "var(--tint-amber-bg)", color: "var(--tint-amber-ink)" }}>BETA</span></div>}
+      {viaTerminal && <div style={{ margin: "12px 0 0", padding: 12, borderRadius: 8, background: "var(--raised)", fontSize: 13, lineHeight: 1.5, color: "var(--muted)" }}>
+        Tandem runs one short Claude Code message at the time you pick, so your 5-hour window starts when you want it to. It counts toward your plan’s limits like any message, shows up as a Claude Code session (not a chat), and only runs while Tandem is open and this PC is on and online.
+      </div>}
+      {!viaTerminal && <div style={{ margin: "12px 0 0", padding: 12, borderRadius: 8, background: "var(--raised)", fontSize: 13, lineHeight: 1.5, color: "var(--muted)" }}>
         Tandem sends one short message in a new Claude chat at the time you pick, so your 5-hour window starts when you want it to.
         <ul style={{ margin: "8px 0 0", paddingLeft: 18 }}>
           <li>It uses claude.ai’s unofficial web route, with this profile’s saved sign-in. It can stop working or be blocked at any time.</li>
@@ -68,7 +95,7 @@ export function SessionStart({ p, schedule, onClose, onDone }: { p: Profile; sch
           <li>Automating claude.ai may not be covered by Anthropic’s terms. Use it at your own discretion.</li>
           <li>It only runs while Tandem is open (the tray counts) and this PC is on and online.</li>
         </ul>
-      </div>
+      </div>}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "18px 0 0" }}>
         <span style={{ fontSize: 14, fontWeight: 500 }}>Start a session automatically</span>
         <button className={enabled ? "switch on" : "switch"} role="switch" aria-checked={enabled} aria-label="Start a session automatically" onClick={() => setEnabled(!enabled)} />

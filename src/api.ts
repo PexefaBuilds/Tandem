@@ -14,7 +14,7 @@ export interface UsageRow { label: string; pct: number; resetsAt: string }
 export interface UpdateInfo { current: string; latest: string; url: string; newer: boolean }
 export interface Usage { app: AppKey; name: string; kind: string; message: string; account: string; plan: string; rows: UsageRow[]; updated: number }
 export interface Found { path: string; name: string; app: AppKey; hasSignIn: boolean; inUse: boolean; isDefault: boolean }
-export interface Schedule { app: AppKey; name: string; enabled: boolean; time: string; repeat: string; message: string; lastSent: number; lastStatus: string; lastNote: string; lastDay: string }
+export interface Schedule { app: AppKey; name: string; enabled: boolean; time: string; repeat: string; message: string; route: string; terminal: string; lastSent: number; lastStatus: string; lastNote: string; lastDay: string }
 export interface Member { app: AppKey; name: string }
 export interface Group { name: string; members: Member[] }
 export interface HistoryRow { id: string; kind: "cc" | "cx" | "claude" | "chatgpt"; profile: string; title: string; cwd: string; updated: number; count: number; snippet: string }
@@ -53,8 +53,8 @@ export const api = {
   hideMain: () => invoke<void>("hide_main"),
   openMain: (route: string | null) => invoke<void>("open_main", { route }),
   setTrayIcon: (dark: boolean) => invoke<void>("set_tray_icon", { dark }),
-  saveSchedule: (app: AppKey, name: string, enabled: boolean, time: string, repeat: string, message: string) => invoke<void>("save_schedule", { app, name, enabled, time, repeat, message }),
-  sendSessionNow: (app: AppKey, name: string, message: string) => invoke<void>("send_session_now", { app, name, message }),
+  saveSchedule: (app: AppKey, name: string, enabled: boolean, time: string, repeat: string, message: string, route: string, terminal: string) => invoke<void>("save_schedule", { app, name, enabled, time, repeat, message, route, terminal }),
+  sendSessionNow: (app: AppKey, name: string, message: string, route: string, terminal: string) => invoke<void>("send_session_now", { app, name, message, route, terminal }),
   terminalSignin: (app: AppKey, name: string) => invoke<void>("terminal_signin", { app, name }),
   historyRefresh: () => invoke<void>("history_refresh"),
   historyStatus: () => invoke<{ indexing: boolean; done: number; total: number }>("history_status"),

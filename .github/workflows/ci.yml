@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest] # macOS is checked on the maintainer's Mac over ssh; GitHub's macOS runners often never start
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

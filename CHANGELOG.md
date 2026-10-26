@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.0
+- New: scheduled session start can now send through Claude Code (`claude -p`) using a signed-in Claude Code profile. It is the default when available, and the web route (beta) stays as the other choice. The Claude Code option is greyed out, with the reason, when the CLI is missing or no profile is signed in.
+
 ## 1.0.2
 - Fix: the "Download" button after "Check for updates" was blocked and did nothing. It now opens the release page.
 - Fix: the built-in app icon (taskbar, pinned shortcut, tray at launch) is now the dark tile, so it is visible on dark taskbars.

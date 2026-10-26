@@ -1,7 +1,8 @@
-//! BETA: start a Claude 5-hour window at a chosen time by sending one short message in a new chat.
+//! Starts a Claude 5-hour window by sending one short message: through the Claude Code CLI (preferred), or BETA through the web route.
+//! BETA web route: start a Claude 5-hour window at a chosen time by sending one short message in a new chat.
 //! Uses claude.ai's unofficial web API with the profile's saved login, so it can break or be blocked at any time.
 //! It only runs while Tandem is open.
-use crate::{engine, store, usage};
+use crate::{engine, store, terminal, usage};
 use chrono::{Local, NaiveTime, TimeZone};
 use serde_json::json;
 use sha2::{Digest, Sha256};
@@ -38,7 +39,10 @@ fn uuid_v4() -> String {
 }
 
 /// Sends the message. Errors are fixed, user-facing text (never a cookie or header).
-pub async fn send(app: &str, name: &str, message: &str) -> Result<(), String> {
+pub async fn send(app: &str, name: &str, message: &str, route: &str, terminal: &str) -> Result<(), String> {
+    if route == "terminal" {
+        return send_terminal(app, message, terminal).await;
+    }
     if app != "claude" {
         return Err("Only Claude profiles can start a session.".into());
     }
@@ -65,9 +69,24 @@ pub async fn send(app: &str, name: &str, message: &str) -> Result<(), String> {
     Ok(())
 }
 
+/// The preferred route: `claude -p` through a signed-in Claude Code profile.
+async fn send_terminal(app: &str, message: &str, terminal: &str) -> Result<(), String> {
+    if app != "claude" {
+        return Err("Only Claude profiles can start a session.".into());
+    }
+    let cc = engine::app_by_key("cc").ok_or("Unknown app")?;
+    let folder = store::load_meta().profiles.into_iter().find(|m| m.app == "cc" && m.name == terminal).map(|m| m.folder).ok_or("Pick a Claude Code profile.")?;
+    let path = store::data_dir().join(cc.profiles_dirname).join(folder);
+    if !terminal::signed_in(&cc, &path) {
+        return Err("That Claude Code profile isn't signed in.".into());
+    }
+    let message = message.to_string();
+    tauri::async_runtime::spawn_blocking(move || terminal::run_prompt(&path, &message)).await.map_err(|_| "Couldn't run Claude Code.".to_string())?
+}
+
 /// Sends now and records the outcome on the profile's schedule (creating no schedule if there is none).
-pub async fn send_and_record(app: &str, name: &str, message: &str) -> Result<(), String> {
-    let res = send(app, name, message).await;
+pub async fn send_and_record(app: &str, name: &str, message: &str, route: &str, terminal: &str) -> Result<(), String> {
+    let res = send(app, name, message, route, terminal).await;
     let _g = store::lock();
     let mut f = store::load_schedules();
     if let Some(s) = f.schedules.iter_mut().find(|s| s.app == app && s.name == name) {
@@ -121,7 +140,7 @@ async fn tick(h: &AppHandle) {
         if late > GRACE_SECS {
             continue;
         }
-        match send_and_record(&s.app, &s.name, &s.message).await {
+        match send_and_record(&s.app, &s.name, &s.message, &s.route, &s.terminal).await {
             Ok(()) => notify(h, format!("Session started: {}", s.name), "Your 5-hour window has begun.".into()),
             Err(e) => notify(h, format!("Couldn't start a session for {}", s.name), e),
         }
