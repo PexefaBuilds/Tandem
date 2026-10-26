@@ -1,10 +1,10 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { api, errText, initial, TINTS, type AppKey, type Profile, type Tint } from "./api";
 
-export function Sheet({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
+export function Sheet({ title, children, onClose, width = 480 }: { title: string; children: ReactNode; onClose: () => void; width?: number }) {
   return (
     <div role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, background: "var(--overlay)", zIndex: 30, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div role="dialog" aria-modal="true" aria-label={title} className="rise" style={{ width: 480, maxWidth: "calc(100vw - 32px)", padding: 24, borderRadius: 16, background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 12px 32px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.06)" }}>
+      <div role="dialog" aria-modal="true" aria-label={title} className="rise" style={{ width, maxWidth: "calc(100vw - 32px)", maxHeight: "calc(100vh - 32px)", overflowY: "auto", padding: 24, borderRadius: 16, background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 12px 32px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.06)" }}>
         <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: "-0.01em" }}>{title}</h2>
         {children}
       </div>

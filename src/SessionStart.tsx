@@ -63,9 +63,9 @@ export function SessionStart({ p, schedule, account, cliFound, terminals, onClos
     : schedule?.lastStatus === "failed" ? `Last attempt failed: ${schedule.lastNote}` : schedule?.lastStatus === "missed" ? `Last start missed: ${schedule.lastNote}` : "";
 
   return (
-    <Sheet title={`Session start · ${p.name}`} onClose={onClose}>
+    <Sheet title={`Session start · ${p.name}`} onClose={onClose} width={760}>
       <div style={{ margin: "14px 0 0", fontSize: 13, fontWeight: 500 }}>How to send it</div>
-      <div role="radiogroup" aria-label="How to send it" style={{ display: "grid", gap: 8, marginTop: 8 }}>
+      <div role="radiogroup" aria-label="How to send it" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}>
         <label style={{ display: "flex", gap: 10, padding: 12, borderRadius: 8, background: "var(--raised)", opacity: canTerminal ? 1 : 0.55, cursor: canTerminal ? "pointer" : "not-allowed" }}>
           <input type="radio" name="route" disabled={!canTerminal} checked={viaTerminal} onChange={() => setRoute("terminal")} />
           <span style={{ fontSize: 13, lineHeight: 1.5 }}>
