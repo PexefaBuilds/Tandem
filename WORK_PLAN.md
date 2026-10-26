@@ -26,10 +26,13 @@ Work only in `D:\Claude-Related\ClaudeFiles_Personal\Tandem`. The `G:` shared-dr
 - History is indexed by polling (open page + every minute) instead of a file watcher: simpler, and enough for chats that change slowly.
 
 ## Current task
-M0 to M8 are built and **v1.0.2 is released** (public repo https://github.com/PexefaBuilds/Tandem; assets: Windows .exe/.msi from CI, universal Mac .dmg built by hand). Nothing is in flight. Mac code: `src-tauri/src/platform/macos.rs` plus `cfg(target_os="macos")` branches in engine, terminal, signin, usage, tray, lib. It compiles and passes `cargo test` on the Mac but has never run against the real Mac Claude/Codex apps.
+M0 to M8 are built and **v1.2.0 is released** (public repo https://github.com/PexefaBuilds/Tandem; assets: Windows .exe/.msi from CI, universal Mac .dmg built by hand). Nothing is in flight. Mac code: `src-tauri/src/platform/macos.rs` plus `cfg(target_os="macos")` branches in engine, terminal, signin, usage, tray, lib. It compiles and passes `cargo test` on the Mac but has never run against the real Mac Claude/Codex apps.
 
 ## Release history
 - 1.0.0 first release. 1.0.1: import scan runs on a thread with a hard ~14 s wait, rescans update stale "in use" state, new Refresh button (`recheck_in_use`). 1.0.2: opener permission allows only `https://github.com/PexefaBuilds/Tandem/**` (the update "Download" button was blocked), built-in icons regenerated from the dark tile (`pnpm tauri icon public/icon-dark.png`; delete the android/ios folders it makes).
+
+## Updater (since 1.2.0)
+`tauri-plugin-updater`; Settings "Update now" downloads, verifies, installs in place (passive NSIS) and restarts. Key: `~/.tauri/tandem-updater.key` (+ `.password`, `.pub` is in `tauri.conf.json`); never commit or print it. Local release (no CI): build Windows with `pnpm tauri build`, Mac as below, `tar` the .app (`COPYFILE_DISABLE=1`), sign the setup.exe and the .app.tar.gz with `pnpm tauri signer sign` (env `TAURI_SIGNING_PRIVATE_KEY_PATH` + `_PASSWORD`), `python scripts/make_latest_json.py <ver> <dir> <notes> PexefaBuilds/Tandem`, then `gh release create vX.Y.Z --target main` with setup.exe, .sig, msi, dmg, app.tar.gz, .sig, latest.json, and cancel the Release workflow run it triggers. Release notes are the same for Windows and Mac (no "experimental" wording).
 
 ## How to release (Windows from CI, Mac by hand)
 1. Bump version in `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json`; add a `CHANGELOG.md` entry; `cargo test`, `pnpm lint`.
