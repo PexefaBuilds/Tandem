@@ -1,4 +1,5 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { getVersion } from "@tauri-apps/api/app";
 import { isMac } from "./platform";
 import type { State } from "./api";
 
@@ -22,6 +23,8 @@ const term = (c: string) => <svg {...svg} stroke={c} strokeWidth="1.6"><path d="
 export function Sidebar({ route, onNav, state }: { route: Route; onNav: (r: Route) => void; state: State | null }) {
   const n = (app: string) => (state ? state.profiles.filter((p) => p.app === app).length : undefined);
   const total = state ? state.profiles.length : 0;
+  const [version, setVersion] = useState("");
+  useEffect(() => { getVersion().then(setVersion).catch(() => {}); }, []);
   return (
     <aside style={{ width: 228, flex: "none", display: "flex", flexDirection: "column", padding: "0 10px 12px" }}>
       <div data-tauri-drag-region style={{ height: 48, display: "flex", alignItems: "center", padding: "0 10px" }}>
@@ -34,7 +37,7 @@ export function Sidebar({ route, onNav, state }: { route: Route; onNav: (r: Rout
         </svg>
         <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15 }}>
           <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.025em" }}>Tandem</span>
-          <span style={{ fontSize: 12, color: "var(--muted)" }}>0.1 · {total} {total === 1 ? "profile" : "profiles"}</span>
+          <span style={{ fontSize: 12, color: "var(--muted)" }}>{version} · {total} {total === 1 ? "profile" : "profiles"}</span>
         </div>
       </div>
 
