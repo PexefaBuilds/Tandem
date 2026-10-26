@@ -6,8 +6,8 @@ import { Sheet } from "./Sheet";
 export interface Item extends Found { checked: boolean; name: string; tint: Tint; error: string; done: boolean }
 
 const APP_NAME: Record<AppKey, string> = { claude: "Claude", codex: "Codex", cc: "Claude Code", cx: "Codex CLI" };
-// Mirrors the time budget of scan_computer in src-tauri/src/import.rs.
-const SCAN_BUDGET_S = 15;
+// Upper bound: the walk stops at 12 s, the wait at 14 s, and checking which profiles are open takes a few more.
+const SCAN_BUDGET_S = 20;
 const PALETTE = TINTS.filter((t) => t !== "graphite"); // graphite stays out of the default rotation
 
 export function useImporter(installed: Record<AppKey, boolean>) {
@@ -19,6 +19,8 @@ export function useImporter(installed: Record<AppKey, boolean>) {
       setNote(found.length ? "" : none);
       setItems((cur) => {
         const fresh = found.filter((f) => !cur.some((c) => c.path === f.path));
+        // A profile seen again may have been closed since: take the new in-use state.
+        cur = cur.map((c) => { const f = found.find((x) => x.path === c.path); return f && f.inUse !== c.inUse ? { ...c, inUse: f.inUse, checked: c.checked || (!f.inUse && installed[c.app]) } : c; });
         return [...cur, ...fresh.map((f, i) => ({ ...f, checked: !f.inUse && installed[f.app], tint: PALETTE[(cur.length + i) % PALETTE.length], error: "", done: false }))];
       });
   }, [installed]);
@@ -41,6 +43,15 @@ export function useImporter(installed: Record<AppKey, boolean>) {
     setScanMs(0); setScanning(true); setNote("");
     try { merge(await api.scanComputer(), "No signed-in profiles found on this computer."); } catch (e) { setNote(errText(e)); }
     setScanning(false);
+  };
+
+  /** Re-checks which listed profiles are still open, so closing Claude and pressing this is enough. */
+  const refresh = async () => {
+    setNote("");
+    try {
+      const open = await api.recheckInUse(items.map((i) => [i.path, i.app]));
+      setItems((cur) => cur.map((c, n) => (open[n] === undefined || open[n] === c.inUse ? c : { ...c, inUse: open[n], checked: c.checked || (!open[n] && installed[c.app]) })));
+    } catch (e) { setNote(errText(e)); }
   };
 
   // Live name check; the backend owns the rules.
@@ -70,7 +81,7 @@ export function useImporter(installed: Record<AppKey, boolean>) {
     setBusy(false);
     return ok;
   };
-  return { items, add, scan, scanning, scanMs, patch, chosen, ready, busy, run, note };
+  return { items, add, refresh, scan, scanning, scanMs, patch, chosen, ready, busy, run, note };
 }
 
 /** The scan stops after SCAN_BUDGET_S at the latest, so the bar is an upper bound; it may finish sooner. */
@@ -92,7 +103,7 @@ export function ImportList({ imp }: { imp: ReturnType<typeof useImporter> }) {
   return (
     <div>
       {imp.items.map((i) => {
-        const sub = i.done ? "Brought over" : i.inUse ? "Open right now. Close it first." : i.error || `${APP_NAME[i.app]} · ${i.isDefault ? "your usual login" : i.hasSignIn ? "has sign-in data" : "no sign-in data"}`;
+        const sub = i.done ? "Brought over" : i.inUse ? "Open right now. Quit it (also from the tray), then press Refresh." : i.error || `${APP_NAME[i.app]} · ${i.isDefault ? "your usual login" : i.hasSignIn ? "has sign-in data" : "no sign-in data"}`;
         const bad = !i.done && (i.inUse || (i.error && i.error !== "Copying…"));
         return (
           <div key={i.path} style={{ display: "flex", alignItems: "center", gap: 12, minHeight: 52, padding: "6px 0" }}>
@@ -109,6 +120,7 @@ export function ImportList({ imp }: { imp: ReturnType<typeof useImporter> }) {
       {imp.note && <p role="status" style={{ margin: "8px 0 0", fontSize: 13, color: "var(--muted)" }}>{imp.note}</p>}
       <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
         <button className="btn" onClick={imp.scan} disabled={imp.busy || imp.scanning}>{imp.scanning ? "Scanning…" : "Scan this computer"}</button>
+        {imp.items.length > 0 && <button className="btn" onClick={imp.refresh} disabled={imp.busy || imp.scanning}>Refresh</button>}
         <button className="btn" onClick={imp.add} disabled={imp.busy}>Add a folder…</button>
       </div>
     </div>

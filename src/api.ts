@@ -33,6 +33,7 @@ export const api = {
   checkName: (app: AppKey, name: string, current: string | null) => invoke<string | null>("check_name", { app, name, current }),
   scanFolder: (path: string) => invoke<Found[]>("scan_folder", { path }),
   scanComputer: () => invoke<Found[]>("scan_computer"),
+  recheckInUse: (items: [string, AppKey][]) => invoke<boolean[]>("recheck_in_use", { items }),
   importProfile: (path: string, app: AppKey, name: string, tint: Tint) => invoke<void>("import_profile", { path, app, name, tint }),
   signinStart: (app: AppKey, name: string) => invoke<void>("signin_start", { app, name }),
   signinStatus: () => invoke<SignInStatus>("signin_status"),

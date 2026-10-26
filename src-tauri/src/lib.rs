@@ -267,6 +267,13 @@ fn found(items: Vec<(PathBuf, &'static str, bool)>) -> Vec<Found> {
         .collect()
 }
 
+/// Whether each listed profile is open right now: a quick re-check, without scanning the disk again.
+#[tauri::command]
+async fn recheck_in_use(items: Vec<(String, String)>) -> Vec<bool> {
+    let dirs: std::collections::HashMap<&str, Vec<String>> = [engine::CLAUDE, engine::CODEX].iter().map(|a| (a.key, engine::user_data_dirs(a))).collect();
+    items.iter().map(|(p, app)| app_by_key(app).zip(dirs.get(app.as_str())).is_some_and(|(a, d)| in_use(&a, std::path::Path::new(p), d))).collect()
+}
+
 /// Dry run: what would be imported from `path`, and what is in the way. Nothing is changed.
 #[tauri::command]
 async fn scan_folder(path: String) -> Vec<Found> {
@@ -276,7 +283,24 @@ async fn scan_folder(path: String) -> Vec<Found> {
 /// Looks in the usual places for profiles that are signed in on this computer.
 #[tauri::command]
 async fn scan_computer() -> Vec<Found> {
-    found(import::scan_computer(signin::default_slot_dir(), &store::data_dir()))
+    // A stalled drive can block one directory read for minutes, so the walk runs on its own thread and we stop
+    // waiting after 20 s whatever it is doing.
+    let out: std::sync::Arc<std::sync::Mutex<Vec<import::Hit>>> = Default::default();
+    let done = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let (o, d) = (out.clone(), done.clone());
+    std::thread::spawn(move || {
+        import::scan_computer(signin::default_slot_dir(), &store::data_dir(), &o);
+        d.store(true, std::sync::atomic::Ordering::SeqCst);
+    });
+    let _ = tauri::async_runtime::spawn_blocking(move || {
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(14);
+        while !done.load(std::sync::atomic::Ordering::SeqCst) && std::time::Instant::now() < deadline {
+            std::thread::sleep(std::time::Duration::from_millis(200));
+        }
+    })
+    .await;
+    let hits = out.lock().unwrap_or_else(|e| e.into_inner()).clone();
+    found(hits)
 }
 
 /// Copy one found profile in. The copy lands under a temporary name and is renamed only on success.
@@ -688,7 +712,7 @@ pub fn run() {
             }
         })
         .invoke_handler(tauri::generate_handler![
-            get_state, create_profile, update_profile, delete_profile, launch, close, show_folder, set_settings, check_name, scan_folder, scan_computer, import_profile, signin_start, signin_status, signin_cancel,
+            get_state, create_profile, update_profile, delete_profile, launch, close, show_folder, set_settings, check_name, scan_folder, scan_computer, recheck_in_use, import_profile, signin_start, signin_status, signin_cancel,
             signin_orphan, signin_recover, usage_snapshot, refresh_usage, check_update, quit, get_groups, save_group, delete_group, add_to_group, launch_group, set_shortcut, hide_main, open_main, hide_flyout, set_tray_icon, save_schedule, send_session_now, terminal_signin, history_refresh, history_status, history_list, history_session, history_import, history_coverage, history_resume
         ])
         .build(tauri::generate_context!())

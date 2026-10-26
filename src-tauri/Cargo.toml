@@ -1,6 +1,6 @@
 [package]
 name = "tandem"
-version = "1.0.0"
+version = "1.0.1"
 description = "Run several Claude and Codex accounts side by side"
 license = "MIT"
 edition = "2021"

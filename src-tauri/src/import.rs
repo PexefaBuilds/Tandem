@@ -86,11 +86,14 @@ const SKIP_WALK: [&str; 14] = [
 
 /// Where profiles usually live: the app's default folder, plus any folder of profiles within a few levels of
 /// the user's folders and the drive roots. Each hit is (path, app, is_default).
-pub fn scan_computer(default_slot: Option<PathBuf>, ours: &Path) -> Vec<(PathBuf, &'static str, bool)> {
-    let mut out: Vec<(PathBuf, &'static str, bool)> = vec![];
+pub type Hit = (PathBuf, &'static str, bool);
+
+/// Results go into `out` as they are found, so a caller that stops waiting still gets what was found so far.
+pub fn scan_computer(default_slot: Option<PathBuf>, ours: &Path, out: &std::sync::Mutex<Vec<Hit>>) {
+    let push = |h: Hit| out.lock().unwrap_or_else(|e| e.into_inner()).push(h);
     if let Some(d) = default_slot {
         if let Some(k) = kind_of(&d) {
-            out.push((d, k, true));
+            push((d, k, true));
         }
     }
     let mut roots: Vec<PathBuf> = vec![];
@@ -101,7 +104,7 @@ pub fn scan_computer(default_slot: Option<PathBuf>, ours: &Path) -> Vec<(PathBuf
         roots.extend(('C'..='Z').map(|c| PathBuf::from(format!("{c}:\\"))).filter(|p| p.is_dir()));
     }
     // Breadth-first with a time budget: the usual places come first, and a huge or network drive can't stall it.
-    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(12);
     let mut queue: std::collections::VecDeque<(PathBuf, u32)> = roots.into_iter().map(|r| (r, 0)).collect();
     let mut seen = std::collections::HashSet::new();
     while let Some((dir, depth)) = queue.pop_front() {
@@ -123,14 +126,13 @@ pub fn scan_computer(default_slot: Option<PathBuf>, ours: &Path) -> Vec<(PathBuf
             }
             if let Some(k) = kind_of(&p) {
                 if seen.insert(p.clone()) {
-                    out.push((p, k, false));
+                    push((p, k, false));
                 }
             } else {
                 queue.push_back((p, depth + 1));
             }
         }
     }
-    out
 }
 
 #[cfg(test)]
