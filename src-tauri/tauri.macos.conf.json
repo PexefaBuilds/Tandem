@@ -1,0 +1,1 @@
+{ "app": { "windows": [{ "title": "Tandem", "width": 1280, "height": 800, "minWidth": 980, "minHeight": 640, "center": true, "titleBarStyle": "Overlay", "hiddenTitle": true, "trafficLightPosition": { "x": 22, "y": 18 } }] } }

@@ -1,0 +1,58 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-10-21T19:10:00Z"},
+  "title": "Tandem — App Design",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 800, "title": "Claude profiles · light, macOS (clickable)", "is_interactive": true, "radius": 12},
+    "MainDark.dc.html": {"x": 1360, "y": 0, "w": 1280, "h": 800, "title": "Claude profiles · dark, Windows (clickable)", "is_interactive": true, "radius": 12},
+
+    "Codex.dc.html": {"x": 0, "y": 1200, "w": 1280, "h": 800, "title": "Codex profiles", "is_interactive": true, "radius": 12},
+    "ClaudeCode.dc.html": {"x": 1360, "y": 1200, "w": 1280, "h": 800, "title": "Claude Code terminal profiles", "is_interactive": true, "radius": 12},
+    "CodexCli.dc.html": {"x": 2720, "y": 1200, "w": 1280, "h": 800, "title": "Codex CLI terminal profiles · Windows", "is_interactive": true, "radius": 12},
+    "Groups.dc.html": {"x": 4080, "y": 1200, "w": 1280, "h": 800, "title": "Groups", "is_interactive": true, "radius": 12},
+
+    "Settings.dc.html": {"x": 0, "y": 2400, "w": 1280, "h": 1440, "title": "Settings · light, macOS", "is_interactive": true, "radius": 12},
+    "SettingsDark.dc.html": {"x": 1360, "y": 2400, "w": 1280, "h": 1440, "title": "Settings · dark, Windows", "is_interactive": true, "radius": 12},
+
+    "NewProfile.dc.html": {"x": 0, "y": 4240, "w": 1280, "h": 800, "title": "1 · New profile", "is_interactive": true, "radius": 12},
+    "SignIn.dc.html": {"x": 1360, "y": 4240, "w": 1280, "h": 800, "title": "2 · Waiting for sign-in", "is_interactive": true, "radius": 12},
+    "SignedIn.dc.html": {"x": 2720, "y": 4240, "w": 1280, "h": 800, "title": "3 · Signed in", "is_interactive": true, "radius": 12},
+    "EditProfile.dc.html": {"x": 4080, "y": 4240, "w": 1280, "h": 800, "title": "Edit name and colour", "is_interactive": true, "radius": 12},
+    "DeleteProfile.dc.html": {"x": 5440, "y": 4240, "w": 1280, "h": 800, "title": "Delete, with typed confirmation", "is_interactive": true, "radius": 12},
+
+    "RowMenu.dc.html": {"x": 0, "y": 5440, "w": 1280, "h": 800, "title": "Profile menu", "is_interactive": true, "radius": 12},
+    "MultiSelect.dc.html": {"x": 1360, "y": 5440, "w": 1280, "h": 800, "title": "Two profiles selected", "is_interactive": true, "radius": 12},
+    "SignedOut.dc.html": {"x": 2720, "y": 5440, "w": 1280, "h": 800, "title": "Signed-out tab", "is_interactive": true, "radius": 12},
+    "Search.dc.html": {"x": 4080, "y": 5440, "w": 1280, "h": 800, "title": "Search", "is_interactive": true, "radius": 12},
+    "Minimized.dc.html": {"x": 5440, "y": 5440, "w": 1280, "h": 800, "title": "After launch: minimized to the tray", "is_interactive": true, "radius": 12},
+
+    "Tray.dc.html": {"x": 0, "y": 6640, "w": 360, "h": 600, "title": "Tray flyout · Windows", "is_interactive": true},
+    "TrayMac.dc.html": {"x": 440, "y": 6640, "w": 360, "h": 600, "title": "Menu bar · macOS", "is_interactive": true},
+
+    "History.dc.html": {"x": 0, "y": 7840, "w": 1280, "h": 800, "title": "Chat history across every profile", "is_interactive": true, "radius": 12},
+
+    "Welcome.dc.html": {"x": 0, "y": 9040, "w": 1280, "h": 800, "title": "First launch · Windows", "is_interactive": true, "radius": 12},
+    "NoApp.dc.html": {"x": 1360, "y": 9040, "w": 1280, "h": 800, "title": "App not installed", "is_interactive": true, "radius": 12},
+    "SigninFailed.dc.html": {"x": 2720, "y": 9040, "w": 1280, "h": 800, "title": "Sign-in didn't finish", "is_interactive": true, "radius": 12},
+    "UsageError.dc.html": {"x": 4080, "y": 9040, "w": 1280, "h": 800, "title": "Offline and expired session · dark", "is_interactive": true, "radius": 12},
+
+    "Notification.dc.html": {"x": 0, "y": 10240, "w": 1440, "h": 1000, "title": "Near-limit notifications"},
+    "Icon.dc.html": {"x": 1520, "y": 10240, "w": 1440, "h": 900, "title": "App icon"},
+    "Logo.dc.html": {"x": 3040, "y": 10240, "w": 1440, "h": 1120, "title": "Logo directions"}
+  },
+  "order": ["Main.dc.html", "MainDark.dc.html", "Codex.dc.html", "ClaudeCode.dc.html", "CodexCli.dc.html", "Groups.dc.html", "Settings.dc.html", "SettingsDark.dc.html", "NewProfile.dc.html", "SignIn.dc.html", "SignedIn.dc.html", "EditProfile.dc.html", "DeleteProfile.dc.html", "RowMenu.dc.html", "MultiSelect.dc.html", "SignedOut.dc.html", "Search.dc.html", "Minimized.dc.html", "Tray.dc.html", "TrayMac.dc.html", "History.dc.html", "Welcome.dc.html", "NoApp.dc.html", "SigninFailed.dc.html", "UsageError.dc.html", "Notification.dc.html", "Icon.dc.html", "Logo.dc.html"],
+  "notes": {
+    "t1": {"x": 0, "y": -260, "text": "Main window", "kind": "title1", "maxW": 2640},
+    "t2": {"x": 0, "y": 940, "text": "Every section", "kind": "title1", "maxW": 5360},
+    "t3": {"x": 0, "y": 2140, "text": "Settings", "kind": "title1", "maxW": 2640},
+    "t4": {"x": 0, "y": 3980, "text": "Adding and managing profiles", "kind": "title1", "maxW": 6720},
+    "t5": {"x": 0, "y": 5180, "text": "Everyday use", "kind": "title1", "maxW": 6720},
+    "t6": {"x": 0, "y": 6380, "text": "Tray and menu bar", "kind": "title1", "maxW": 2640},
+    "t7": {"x": 0, "y": 7580, "text": "Chat history", "kind": "title1", "maxW": 2640},
+    "t8": {"x": 0, "y": 8780, "text": "First launch and problems", "kind": "title1", "maxW": 5360},
+    "t9": {"x": 0, "y": 9980, "text": "Notifications, app icon and logo", "kind": "title1", "maxW": 4480}
+  },
+  "designSystems": []
+}

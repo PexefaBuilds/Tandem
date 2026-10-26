@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tandem logo directions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.lg{font-family:"Instrument Sans",system-ui,sans-serif;color:#131416}
+.lg *{box-sizing:border-box}
+.lg .tone{--c1:#b4532c;--c2:#2160c4;--ov:#131416;--ink:#131416;background:#ffffff}
+.lg .tone.dark{--c1:#e38c64;--c2:#76a5f2;--ov:#ececee;--ink:#ececee;background:#1d1f21}
+.lg .lock{display:flex;align-items:center;justify-content:center;gap:14px}
+.lg .word{font-size:34px;font-weight:600;letter-spacing:-0.025em;color:var(--ink);line-height:1}
+.lg .card{background:#ffffff;border:1px solid #e6e8ea;border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.lg .cap{display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:1px solid #eff0f2}
+</style>
+</helmet>
+
+<div class="lg" style="width: 1440px; height: 1120px; background: #f6f7f8; padding: 48px; display: flex; flex-direction: column; gap: 32px;">
+  <div>
+    <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.015em;">Tandem logo directions</h1>
+    <p style="margin: 6px 0 0 0; font-size: 14px; color: #5b5e62;">Six ideas for "two accounts working side by side". Each is shown as the full logo on light and dark, and as the mark at 24 and 16 px.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px;">
+
+    <!-- A · Overlap -->
+    <div class="card">
+      <sc-for list="{{tones}}" as="t" hint-placeholder-count="2">
+        <div class="{{t.cls}}" style="height: 148px; display: flex; align-items: center; justify-content: center;">
+          <div class="lock">
+            <svg width="52" height="52" viewBox="0 0 48 48" role="img" aria-label="Overlap mark"><rect x="2" y="16" width="30" height="30" rx="8" fill="var(--c1)"></rect><rect x="16" y="2" width="30" height="30" rx="8" fill="var(--c2)"></rect><path d="M16 24A8 8 0 0 1 24 16H32V24A8 8 0 0 1 24 32H16Z" fill="var(--ov)"></path></svg>
+            <span class="word">Tandem</span>
+          </div>
+        </div>
+      </sc-for>
+      <div class="cap">
+        <div style="flex-grow: 1;"><div style="font-size: 15px; font-weight: 600;">A · Overlap</div><div style="font-size: 13px; color: #5b5e62; margin-top: 2px;">Claude and Codex meet in the middle. The one in the drafts.</div></div>
+        <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="16" width="30" height="30" rx="8" fill="#b4532c"></rect><rect x="16" y="2" width="30" height="30" rx="8" fill="#2160c4"></rect><path d="M16 24A8 8 0 0 1 24 16H32V24A8 8 0 0 1 24 32H16Z" fill="#131416"></path></svg>
+        <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="16" width="30" height="30" rx="8" fill="#b4532c"></rect><rect x="16" y="2" width="30" height="30" rx="8" fill="#2160c4"></rect><path d="M16 24A8 8 0 0 1 24 16H32V24A8 8 0 0 1 24 32H16Z" fill="#131416"></path></svg>
+      </div>
+    </div>
+
+    <!-- B · Wheels -->
+    <div class="card">
+      <sc-for list="{{tones}}" as="t" hint-placeholder-count="2">
+        <div class="{{t.cls}}" style="height: 148px; display: flex; align-items: center; justify-content: center;">
+          <div class="lock">
+            <svg width="60" height="52" viewBox="0 0 56 48" role="img" aria-label="Wheels mark"><circle cx="17" cy="24" r="13" fill="none" stroke="var(--c1)" stroke-width="5.5"></circle><circle cx="39" cy="24" r="13" fill="none" stroke="var(--c2)" stroke-width="5.5"></circle></svg>
+            <span class="word">Tandem</span>
+          </div>
+        </div>
+      </sc-for>
+      <div class="cap">
+        <div style="flex-grow: 1;"><div style="font-size: 15px; font-weight: 600;">B · Wheels</div><div style="font-size: 13px; color: #5b5e62; margin-top: 2px;">The two wheels of a tandem bike. Friendly and quick to read.</div></div>
+        <svg width="28" height="24" viewBox="0 0 56 48" aria-hidden="true"><circle cx="17" cy="24" r="13" fill="none" stroke="#b4532c" stroke-width="6"></circle><circle cx="39" cy="24" r="13" fill="none" stroke="#2160c4" stroke-width="6"></circle></svg>
+        <svg width="19" height="16" viewBox="0 0 56 48" aria-hidden="true"><circle cx="17" cy="24" r="13" fill="none" stroke="#b4532c" stroke-width="7"></circle><circle cx="39" cy="24" r="13" fill="none" stroke="#2160c4" stroke-width="7"></circle></svg>
+      </div>
+    </div>
+
+    <!-- C · Side by side -->
+    <div class="card">
+      <sc-for list="{{tones}}" as="t" hint-placeholder-count="2">
+        <div class="{{t.cls}}" style="height: 148px; display: flex; align-items: center; justify-content: center;">
+          <div class="lock">
+            <svg width="52" height="52" viewBox="0 0 48 48" role="img" aria-label="Side by side mark"><rect x="7" y="4" width="15" height="32" rx="7.5" fill="var(--c1)"></rect><rect x="26" y="12" width="15" height="32" rx="7.5" fill="var(--c2)"></rect></svg>
+            <span class="word">Tandem</span>
+          </div>
+        </div>
+      </sc-for>
+      <div class="cap">
+        <div style="flex-grow: 1;"><div style="font-size: 15px; font-weight: 600;">C · Side by side</div><div style="font-size: 13px; color: #5b5e62; margin-top: 2px;">Two lanes, offset like two people taking turns. The calmest.</div></div>
+        <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="4" width="15" height="32" rx="7.5" fill="#b4532c"></rect><rect x="26" y="12" width="15" height="32" rx="7.5" fill="#2160c4"></rect></svg>
+        <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="4" width="15" height="32" rx="7.5" fill="#b4532c"></rect><rect x="26" y="12" width="15" height="32" rx="7.5" fill="#2160c4"></rect></svg>
+      </div>
+    </div>
+
+    <!-- D · T monogram -->
+    <div class="card">
+      <sc-for list="{{tones}}" as="t" hint-placeholder-count="2">
+        <div class="{{t.cls}}" style="height: 148px; display: flex; align-items: center; justify-content: center;">
+          <div class="lock">
+            <svg width="52" height="52" viewBox="0 0 48 48" role="img" aria-label="T monogram mark"><rect x="5" y="7" width="38" height="11" rx="5.5" fill="var(--c1)"></rect><rect x="18.5" y="7" width="11" height="35" rx="5.5" fill="var(--c2)"></rect><path d="M18.5 18V12.5A5.5 5.5 0 0 1 29.5 12.5V18Z" fill="var(--ov)"></path></svg>
+            <span class="word">Tandem</span>
+          </div>
+        </div>
+      </sc-for>
+      <div class="cap">
+        <div style="flex-grow: 1;"><div style="font-size: 15px; font-weight: 600;">D · T monogram</div><div style="font-size: 13px; color: #5b5e62; margin-top: 2px;">A T built from two strokes that cross. Most like a brand letter.</div></div>
+        <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="7" width="38" height="11" rx="5.5" fill="#b4532c"></rect><rect x="18.5" y="7" width="11" height="35" rx="5.5" fill="#2160c4"></rect><path d="M18.5 18V12.5A5.5 5.5 0 0 1 29.5 12.5V18Z" fill="#131416"></path></svg>
+        <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="7" width="38" height="11" rx="5.5" fill="#b4532c"></rect><rect x="18.5" y="7" width="11" height="35" rx="5.5" fill="#2160c4"></rect><path d="M18.5 18V12.5A5.5 5.5 0 0 1 29.5 12.5V18Z" fill="#131416"></path></svg>
+      </div>
+    </div>
+
+    <!-- E · Double launch -->
+    <div class="card">
+      <sc-for list="{{tones}}" as="t" hint-placeholder-count="2">
+        <div class="{{t.cls}}" style="height: 148px; display: flex; align-items: center; justify-content: center;">
+          <div class="lock">
+            <svg width="52" height="52" viewBox="0 0 48 48" role="img" aria-label="Double launch mark"><path d="M7 9.5 25 24 7 38.5Z" fill="var(--c1)" stroke="var(--c1)" stroke-width="5" stroke-linejoin="round"></path><path d="M22 9.5 40 24 22 38.5Z" fill="var(--c2)" stroke="var(--c2)" stroke-width="5" stroke-linejoin="round"></path></svg>
+            <span class="word">Tandem</span>
+          </div>
+        </div>
+      </sc-for>
+      <div class="cap">
+        <div style="flex-grow: 1;"><div style="font-size: 15px; font-weight: 600;">E · Double launch</div><div style="font-size: 13px; color: #5b5e62; margin-top: 2px;">Two play arrows: launch one, then the next. Says what it does.</div></div>
+        <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true"><path d="M7 9.5 25 24 7 38.5Z" fill="#b4532c" stroke="#b4532c" stroke-width="5" stroke-linejoin="round"></path><path d="M22 9.5 40 24 22 38.5Z" fill="#2160c4" stroke="#2160c4" stroke-width="5" stroke-linejoin="round"></path></svg>
+        <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path d="M7 9.5 25 24 7 38.5Z" fill="#b4532c" stroke="#b4532c" stroke-width="5" stroke-linejoin="round"></path><path d="M22 9.5 40 24 22 38.5Z" fill="#2160c4" stroke="#2160c4" stroke-width="5" stroke-linejoin="round"></path></svg>
+      </div>
+    </div>
+
+    <!-- F · Linked -->
+    <div class="card">
+      <sc-for list="{{tones}}" as="t" hint-placeholder-count="2">
+        <div class="{{t.cls}}" style="height: 148px; display: flex; align-items: center; justify-content: center;">
+          <div class="lock">
+            <svg width="60" height="52" viewBox="0 0 56 48" role="img" aria-label="Linked mark"><rect x="14" y="20" width="28" height="8" rx="4" fill="var(--ov)"></rect><circle cx="14" cy="24" r="11" fill="var(--c1)"></circle><circle cx="42" cy="24" r="11" fill="var(--c2)"></circle></svg>
+            <span class="word">Tandem</span>
+          </div>
+        </div>
+      </sc-for>
+      <div class="cap">
+        <div style="flex-grow: 1;"><div style="font-size: 15px; font-weight: 600;">F · Linked</div><div style="font-size: 13px; color: #5b5e62; margin-top: 2px;">Two accounts joined by one app. Simple, a little technical.</div></div>
+        <svg width="28" height="24" viewBox="0 0 56 48" aria-hidden="true"><rect x="14" y="20" width="28" height="8" rx="4" fill="#131416"></rect><circle cx="14" cy="24" r="11" fill="#b4532c"></circle><circle cx="42" cy="24" r="11" fill="#2160c4"></circle></svg>
+        <svg width="19" height="16" viewBox="0 0 56 48" aria-hidden="true"><rect x="14" y="20" width="28" height="8" rx="4" fill="#131416"></rect><circle cx="14" cy="24" r="12" fill="#b4532c"></circle><circle cx="42" cy="24" r="12" fill="#2160c4"></circle></svg>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1120}}'>
+class Component extends DCLogic {
+  renderVals() { return { tones: [{ cls: 'tone' }, { cls: 'tone dark' }] }; }
+}
+</script>
+</body>
+</html>

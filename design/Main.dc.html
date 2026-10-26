@@ -1,0 +1,1202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tandem — profiles</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.mi{
+  --ground:#f6f7f8;--surface:#ffffff;--raised:#f3f4f6;--active:#e9ebed;--border:#e6e8ea;--rule:#eff0f2;--control:#cbcdd1;
+  --text:#131416;--muted:#5b5e62;--faint:#66696e;
+  --primary-bg:#131416;--primary-ink:#ffffff;
+  --focus:#0a5dc2;--switch-off:#7d8086;--switch-on:#1e7b4f;--knob:#ffffff;--danger-ink:#ffffff;
+  --claude:#b4532c;--codex:#2160c4;
+  --positive:#1e7b4f;--negative:#c4242a;
+  --bar-track:#eceef0;--bar-fill:#3d4045;
+  --overlay:rgba(19,20,22,.28);
+  --tint-graphite-bg:#e9ebed;--tint-graphite-ink:#353736;
+  --tint-blue-bg:#e2ecfb;--tint-blue-ink:#1d4c8c;
+  --tint-green-bg:#dff2e7;--tint-green-ink:#1d6840;
+  --tint-amber-bg:#f9eed6;--tint-amber-ink:#744a05;
+  --tint-rose-bg:#fae3e8;--tint-rose-ink:#8c2241;
+  --tint-teal-bg:#dcf1ef;--tint-teal-ink:#145f5a;
+  font-family:"Instrument Sans",system-ui,sans-serif;color:var(--text);
+}
+.mi.dark{
+  --ground:#161719;--surface:#1d1f21;--raised:#232528;--active:#2c2f32;--border:#2d3033;--rule:#26282b;--control:#4a4d52;
+  --text:#ececee;--muted:#a3a6ab;--faint:#94989d;
+  --primary-bg:#ececee;--primary-ink:#131416;
+  --focus:#8ab4ff;--switch-off:#6b6f75;--switch-on:#ececee;--knob:#1d1f21;--danger-ink:#131416;
+  --claude:#e38c64;--codex:#76a5f2;
+  --positive:#5cc28b;--negative:#f2726f;
+  --bar-track:#2e3134;--bar-fill:#c9ccd0;
+  --overlay:rgba(0,0,0,.5);
+  --tint-graphite-bg:#33363a;--tint-graphite-ink:#dcdee1;
+  --tint-blue-bg:#1f3350;--tint-blue-ink:#b7d0f6;
+  --tint-green-bg:#1c3a2a;--tint-green-ink:#a9dfbf;
+  --tint-amber-bg:#3f3218;--tint-amber-ink:#efd29a;
+  --tint-rose-bg:#45212b;--tint-rose-ink:#f4bccb;
+  --tint-teal-bg:#173a38;--tint-teal-ink:#a3dcd6;
+}
+.mi *{box-sizing:border-box}
+.mi button,.mi input,.mi select{font-family:inherit;color:inherit}
+.mi .num{font-variant-numeric:tabular-nums}
+.mi .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.mi .nav{display:flex;align-items:center;gap:10px;width:100%;height:32px;padding:0 10px;border:0;border-radius:8px;background:transparent;font-size:14px;color:var(--muted);cursor:pointer;text-align:left}
+.mi .nav:hover{color:var(--text)}
+.mi .nav.on{background:var(--active);color:var(--text);font-weight:500}
+.mi .nav:focus-visible,.mi .btn:focus-visible,.mi .icon-btn:focus-visible,.mi .tab:focus-visible,.mi .seg button:focus-visible,.mi .sw:focus-visible,.mi .menu button:focus-visible,.mi .switch:focus-visible,.mi a.link:focus-visible,.mi .ck:focus-within{outline:2px solid var(--focus);outline-offset:2px}
+.mi .ck{width:28px;height:28px;display:inline-flex;align-items:center;justify-content:flex-start;border-radius:6px;cursor:pointer}
+.mi .ck input{width:18px;height:18px;margin:0;accent-color:var(--text);cursor:pointer}
+.mi .hot-text{color:var(--negative)}
+.mi .btn{height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--control);background:var(--surface);font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.mi .btn:hover{background:var(--raised)}
+.mi .btn:active{transform:scale(.98)}
+.mi .btn.primary{background:var(--primary-bg);color:var(--primary-ink);border-color:var(--primary-bg)}
+.mi .btn.primary:hover{opacity:.88}
+.mi .btn.primary[disabled]{opacity:1;background:var(--raised);color:var(--muted);border-color:var(--control);cursor:default}
+.mi .btn.danger{background:var(--negative);border-color:var(--negative);color:var(--danger-ink)}
+.mi .btn.danger[disabled]{opacity:.35;cursor:default}
+.mi .btn.quiet{border-color:transparent;background:transparent}
+.mi .btn.quiet:hover{background:var(--active)}
+.mi .icon-btn{width:32px;height:32px;border-radius:8px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer}
+.mi .icon-btn:hover{background:var(--active);color:var(--text)}
+.mi .tab{height:40px;padding:0;border:0;background:transparent;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:inline-flex;gap:6px;align-items:center}
+.mi .tab.on{color:var(--text);font-weight:600;border-bottom-color:var(--text)}
+.mi .row{display:grid;grid-template-columns:28px minmax(0,1fr) 64px 92px 164px 164px 104px 32px;column-gap:12px;align-items:center;height:60px;padding:0 8px;margin:0 -8px;border-radius:8px;position:relative}
+.mi .row:hover{background:var(--raised)}
+.mi .row.sel{background:var(--active)}
+.mi .trow{display:grid;grid-template-columns:28px minmax(0,1fr) 300px 140px 128px 32px;column-gap:12px;align-items:center;height:60px;padding:0 8px;margin:0 -8px;border-radius:8px;position:relative}
+.mi .trow:hover{background:var(--raised)}
+.mi .head{height:36px;font-size:12px;color:var(--muted)}
+.mi .head:hover{background:transparent}
+.mi .av{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex:none}
+.mi .tint-graphite{background:var(--tint-graphite-bg);color:var(--tint-graphite-ink)}
+.mi .tint-blue{background:var(--tint-blue-bg);color:var(--tint-blue-ink)}
+.mi .tint-green{background:var(--tint-green-bg);color:var(--tint-green-ink)}
+.mi .tint-amber{background:var(--tint-amber-bg);color:var(--tint-amber-ink)}
+.mi .tint-rose{background:var(--tint-rose-bg);color:var(--tint-rose-ink)}
+.mi .tint-teal{background:var(--tint-teal-bg);color:var(--tint-teal-ink)}
+.mi .pill{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:500;background:var(--tint-graphite-bg);color:var(--tint-graphite-ink);white-space:nowrap;flex:none}
+.mi .dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.mi .dot.run{background:var(--positive)}
+.mi .dot.idle{background:var(--control)}
+.mi .dot.out{background:transparent;border:1.5px solid var(--faint)}
+.mi .track{height:6px;border-radius:999px;background:var(--bar-track);overflow:hidden}
+.mi .fill{height:6px;border-radius:999px;background:var(--bar-fill)}
+.mi .fill.hot{background:var(--negative)}
+.mi .menu{position:absolute;right:0;top:38px;z-index:20;width:236px;padding:6px;border-radius:12px;background:var(--surface);border:1px solid var(--border);box-shadow:0 12px 32px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.06)}
+.mi .menu button{display:flex;align-items:center;gap:10px;width:100%;height:32px;padding:0 10px;border:0;border-radius:7px;background:transparent;font-size:13px;cursor:pointer;text-align:left}
+.mi .menu button:hover{background:var(--raised)}
+.mi .menu button.bad{color:var(--negative)}
+.mi .menu .sep{height:1px;background:var(--rule);margin:6px 4px}
+.mi .seg{display:inline-flex;padding:3px;border-radius:999px;background:var(--raised);gap:2px}
+.mi .seg button{height:28px;padding:0 14px;border-radius:999px;border:0;background:transparent;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.mi .seg button.on{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.mi.dark .seg button.on{background:var(--active)}
+.mi .field{height:36px;width:100%;padding:0 12px;border-radius:8px;border:1px solid var(--control);background:var(--surface);font-size:14px;outline:none}
+.mi .field:focus{border-color:var(--focus);box-shadow:0 0 0 3px rgba(10,93,194,.2)}
+.mi .sw{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.mi .sw.on{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--text)}
+.mi .switch{position:relative;width:40px;height:24px;border-radius:999px;border:0;background:var(--switch-off);cursor:pointer;flex:none;padding:0}
+.mi .switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--knob);transition:transform .18s ease}
+.mi .switch:not(.on)::after{background:#ffffff}
+.mi .switch.on{background:var(--switch-on)}
+.mi .switch.on::after{transform:translateX(16px)}
+.mi .set-row{display:grid;grid-template-columns:280px minmax(0,1fr);column-gap:24px;align-items:center;padding:16px 0;border-top:1px solid var(--rule)}
+.mi .wait{height:4px;border-radius:999px;background:var(--bar-track);overflow:hidden;position:relative}
+.mi .wait::after{content:"";position:absolute;top:0;bottom:0;width:30%;border-radius:999px;background:var(--text);animation:mi-slide 1.2s ease-in-out infinite}
+@keyframes mi-slide{0%{left:-30%}100%{left:100%}}
+@keyframes mi-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.mi .rise{animation:mi-rise .18s ease-out}
+@media (prefers-reduced-motion: reduce){.mi .rise{animation:none}.mi .wait::after{animation:none;left:35%}.mi .switch::after{transition:none}}
+.mi .chat{display:block;width:100%;padding:12px;border:0;border-radius:10px;background:transparent;text-align:left;cursor:pointer}
+.mi .chat:hover{background:var(--raised)}
+.mi .chat.on{background:var(--active)}
+.mi .chat:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.mi a.link{color:var(--text);font-weight:500;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--control);cursor:pointer;background:none;border:0;padding:0;font-size:inherit}
+</style>
+</helmet>
+
+<div class="{{rootClass}}" style="width: 1280px; height: {{winH}}px; position: relative; overflow: hidden; display: flex; background: var(--ground); border-radius: 12px;">
+
+  <!-- SEARCH: centred on the window, vertically centred in the 48px top bar -->
+  <div style="position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 440px; height: 32px; z-index: 5; display: flex; align-items: center;">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="position: absolute; left: 13px; color: var(--faint);" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3" stroke-linecap="round"></path></svg>
+    <label for="mi-search" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Search profiles</label>
+    <input id="mi-search" class="field" style="height: 32px; padding-left: 36px; padding-right: 64px; background: var(--surface); border-color: var(--border); border-radius: 999px; font-size: 13px;" placeholder="Search profiles and groups" value="{{query}}" onChange="{{onQuery}}">
+    <span style="position: absolute; right: 14px; font-size: 12px; color: var(--faint);">{{shortcutHint}}</span>
+  </div>
+
+  <!-- SIDEBAR (tinted frame, left arm of the L) -->
+  <aside style="width: 228px; flex: none; display: flex; flex-direction: column; padding: 0 10px 12px 10px;">
+    <div style="height: 48px; display: flex; align-items: center; gap: 8px; padding: 0 10px;">
+      <sc-if value="{{isMac}}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; gap: 8px; margin-right: 10px;" aria-hidden="true">
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; display: inline-block;"></span>
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e; display: inline-block;"></span>
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840; display: inline-block;"></span>
+        </div>
+      </sc-if>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; padding: 4px 10px 18px 10px;">
+      <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true">
+        <rect x="7" y="4" width="15" height="32" rx="7.5" fill="var(--claude)"></rect>
+        <rect x="26" y="12" width="15" height="32" rx="7.5" fill="var(--codex)"></rect>
+      </svg>
+      <div style="display: flex; flex-direction: column; line-height: 1.15;">
+        <span style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em;">Tandem</span>
+        <span style="font-size: 12px; color: var(--muted);">1.0 · 11 profiles</span>
+      </div>
+    </div>
+
+    <div style="font-size: 12px; color: var(--muted); padding: 6px 10px 6px 10px;">Desktop apps</div>
+    <sc-for list="{{navApps}}" as="n" hint-placeholder-count="2">
+      <button class="{{n.cls}}" onClick="{{n.go}}" aria-current="{{n.current}}">
+        <span class="dot" style="background: {{n.color}};"></span>
+        <span style="flex-grow: 1;">{{n.label}}</span>
+        <span class="num" style="font-size: 12px; color: var(--faint);">{{n.count}}</span>
+      </button>
+    </sc-for>
+
+    <div style="font-size: 12px; color: var(--muted); padding: 20px 10px 6px 10px;">Terminal</div>
+    <sc-for list="{{navTerm}}" as="n" hint-placeholder-count="2">
+      <button class="{{n.cls}}" onClick="{{n.go}}" aria-current="{{n.current}}">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="{{n.color}}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5 6.5 8 3 11.5"></path><path d="M8.5 11.5H13"></path></svg>
+        <span style="flex-grow: 1;">{{n.label}}</span>
+        <span class="num" style="font-size: 12px; color: var(--faint);">{{n.count}}</span>
+      </button>
+    </sc-for>
+
+    <div style="font-size: 12px; color: var(--muted); padding: 20px 10px 6px 10px;">Launch together</div>
+    <button class="{{navGroupsCls}}" onClick="{{goGroups}}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="2" width="5" height="5" rx="1.5"></rect><rect x="9" y="2" width="5" height="5" rx="1.5"></rect><rect x="2" y="9" width="5" height="5" rx="1.5"></rect><rect x="9" y="9" width="5" height="5" rx="1.5"></rect></svg>
+      <span style="flex-grow: 1;">Groups</span>
+      <span class="num" style="font-size: 12px; color: var(--faint);">{{groupCount}}</span>
+    </button>
+    <button class="{{navHistCls}}" onClick="{{goHistory}}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z"></path></svg>
+      <span style="flex-grow: 1;">Chat history</span>
+    </button>
+
+    <div style="flex-grow: 1;"></div>
+    <button class="{{navSettingsCls}}" onClick="{{goSettings}}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="2.2"></circle><path d="M8 1.8v1.6M8 12.6v1.6M1.8 8h1.6M12.6 8h1.6M3.6 3.6l1.1 1.1M11.3 11.3l1.1 1.1M3.6 12.4l1.1-1.1M11.3 4.7l1.1-1.1"></path></svg>
+      <span style="flex-grow: 1;">Settings</span>
+    </button>
+  </aside>
+
+  <!-- RIGHT COLUMN: top bar (top arm of the L) + white sheet -->
+  <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; padding: 0 8px 8px 0;">
+    <div style="height: 48px; flex: none; display: flex; align-items: center; gap: 12px; position: relative;">
+      <div style="flex-grow: 1;"></div>
+      <span style="font-size: 12px; color: var(--muted);">Usage updated 2 min ago</span>
+      <button class="icon-btn" aria-label="Refresh usage" onClick="{{refresh}}">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"></path><path d="M13.5 2.5v3h-3"></path></svg>
+      </button>
+      <sc-if value="{{isWin}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; align-items: center; margin-left: 8px; margin-right: -8px; color: var(--muted);" aria-hidden="true">
+          <span style="width: 46px; height: 48px; display: inline-flex; align-items: center; justify-content: center;"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M0 5h10" stroke="currentColor"></path></svg></span>
+          <span style="width: 46px; height: 48px; display: inline-flex; align-items: center; justify-content: center;"><svg width="10" height="10" viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor"></rect></svg></span>
+          <span style="width: 46px; height: 48px; display: inline-flex; align-items: center; justify-content: center;"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M0 0l10 10M10 0 0 10" stroke="currentColor"></path></svg></span>
+        </div>
+      </sc-if>
+    </div>
+
+    <main style="flex: 1 1 auto; min-height: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px 24px 24px 24px; overflow: auto; position: relative;">
+
+      <!-- ============ DESKTOP APP PROFILES (Claude / Codex) ============ -->
+      <sc-if value="{{showDesktop}}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="flex-grow: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="dot" style="width: 10px; height: 10px; background: {{appColor}};"></span>
+              <h1 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.015em;">{{appTitle}}</h1>
+            </div>
+            <p style="margin: 6px 0 0 0; font-size: 14px; color: var(--muted);">{{appSub}}</p>
+          </div>
+          <button class="btn" onClick="{{openNew}}">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M7 2.5v9M2.5 7h9"></path></svg>
+            New profile
+          </button>
+          <button class="btn primary" onClick="{{launchSelected}}" disabled="{{launchDisabled}}">{{launchLabel}}</button>
+        </div>
+
+        <!-- Usage could not refresh -->
+        <sc-if value="{{usageErr}}" hint-placeholder-val="{{ false }}">
+          <div role="status" style="margin-top: 20px; display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; background: var(--raised); border: 1px solid var(--border);">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5a11 11 0 0 1 15 0"></path><path d="M5.5 10.5a6.5 6.5 0 0 1 9 0"></path><circle cx="10" cy="14" r="1" fill="var(--muted)"></circle><path d="M3 3l14 14"></path></svg>
+            <div style="flex-grow: 1; min-width: 0; font-size: 14px; line-height: 1.45;">
+              <span style="font-weight: 600;">You're offline, so usage can't refresh.</span>
+              <span style="color: var(--muted);"> The figures below are from 2:14 PM. Profiles still launch normally.</span>
+            </div>
+            <button class="btn" onClick="{{retryUsage}}">Try again</button>
+          </div>
+        </sc-if>
+
+        <!-- The finding: which account has room right now -->
+        <sc-if value="{{usageOk}}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top: 20px; display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; background: var(--raised);">
+          <span class="{{best.avCls}}">{{best.initial}}</span>
+          <div style="flex-grow: 1; min-width: 0; font-size: 14px; line-height: 1.45;">
+            <span style="font-weight: 600;">{{best.name}} has the most room right now.</span>
+            <span style="color: var(--muted);"> {{best.detail}}</span>
+          </div>
+          <button class="btn" onClick="{{best.launch}}">{{best.cta}}</button>
+        </div>
+        </sc-if>
+
+        <div style="margin-top: 22px; display: flex; gap: 24px; border-bottom: 1px solid var(--border);" role="tablist">
+          <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+            <button class="{{t.cls}}" role="tab" aria-selected="{{t.sel}}" onClick="{{t.go}}">{{t.label}} <span class="num" style="color: var(--faint); font-weight: 400;">{{t.count}}</span></button>
+          </sc-for>
+        </div>
+
+        <div class="row head" style="margin-top: 4px;">
+          <span></span>
+          <span>Profile</span>
+          <span>Plan</span>
+          <span>Status</span>
+          <span>5-hour limit</span>
+          <span>Weekly limit</span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <sc-for list="{{rows}}" as="p" hint-placeholder-count="5">
+          <div class="{{p.rowCls}}">
+            <label class="ck"><input type="checkbox" checked="{{p.checked}}" onChange="{{p.toggle}}" aria-label="Select {{p.name}}" disabled="{{p.noCheck}}"></label>
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <span class="{{p.avCls}}">{{p.initial}}</span>
+              <div style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                <span style="font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{p.name}}</span>
+                <span style="font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{p.email}}</span>
+              </div>
+              <sc-if value="{{p.main}}" hint-placeholder-val="{{ false }}"><span class="pill">Default</span></sc-if>
+            </div>
+            <span style="font-size: 13px; color: var(--muted);">{{p.plan}}</span>
+            <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px;"><span class="{{p.dotCls}}"></span>{{p.status}}</span>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <sc-if value="{{p.hasUsage}}" hint-placeholder-val="{{ true }}">
+                <div class="track" role="img" aria-label="{{p.u5Aria}}"><div class="{{p.f5Cls}}" style="width: {{p.u5}}%;"></div></div>
+                <span class="num" style="font-size: 12px; color: var(--muted);"><span class="{{p.t5Cls}}" style="font-weight: 500;">{{p.u5}}%{{p.near5}}</span> · resets {{p.r5}}</span>
+              </sc-if>
+              <sc-if value="{{p.noUsage}}" hint-placeholder-val="{{ false }}"><span style="color: var(--faint);">—</span></sc-if>
+              <sc-if value="{{p.expired}}" hint-placeholder-val="{{ false }}">
+                <span style="font-size: 13px; font-weight: 500;">Session expired</span>
+                <span style="font-size: 12px; color: var(--muted);">Usage unknown</span>
+              </sc-if>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <sc-if value="{{p.hasUsage}}" hint-placeholder-val="{{ true }}">
+                <div class="track" role="img" aria-label="{{p.u7Aria}}"><div class="{{p.f7Cls}}" style="width: {{p.u7}}%;"></div></div>
+                <span class="num" style="font-size: 12px; color: var(--muted);"><span class="{{p.t7Cls}}" style="font-weight: 500;">{{p.u7}}%{{p.near7}}</span> · resets {{p.r7}}</span>
+              </sc-if>
+              <sc-if value="{{p.noUsage}}" hint-placeholder-val="{{ false }}"><span style="color: var(--faint);">—</span></sc-if>
+              <sc-if value="{{p.expired}}" hint-placeholder-val="{{ false }}">
+                <span style="font-size: 12px; color: var(--muted); line-height: 1.4;">Open it once to sign back in and refresh</span>
+              </sc-if>
+            </div>
+            <div style="display: flex; justify-content: flex-end;">
+              <button class="{{p.actCls}}" onClick="{{p.act}}" style="min-width: 88px; justify-content: center;">{{p.actLabel}}</button>
+            </div>
+            <div style="position: relative;">
+              <button class="icon-btn" aria-label="More for {{p.name}}" aria-haspopup="menu" aria-expanded="{{p.menuOpen}}" onClick="{{p.openMenu}}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3.5" cy="8" r="1.3"></circle><circle cx="8" cy="8" r="1.3"></circle><circle cx="12.5" cy="8" r="1.3"></circle></svg>
+              </button>
+              <sc-if value="{{p.menuOpen}}" hint-placeholder-val="{{ false }}">
+                <div class="menu rise" role="menu" onKeyDown="{{onMenuKey}}">
+                  <sc-if value="{{p.editable}}" hint-placeholder-val="{{ true }}">
+                    <button role="menuitem" autoFocus="{{ true }}" onClick="{{p.edit}}">Edit name and colour</button>
+                  </sc-if>
+                  <button role="menuitem" onClick="{{p.signin}}">{{p.signinLabel}}</button>
+                  <sc-if value="{{p.editable}}" hint-placeholder-val="{{ true }}">
+                    <button role="menuitem" onClick="{{p.addGroup}}">Add to “Work trio”</button>
+                  </sc-if>
+                  <button role="menuitem" onClick="{{p.shortcut}}">{{p.shortcutLabel}}</button>
+                  <button role="menuitem" onClick="{{p.folder}}">Show profile folder</button>
+                  <sc-if value="{{p.editable}}" hint-placeholder-val="{{ true }}">
+                    <div class="sep"></div>
+                    <button role="menuitem" class="bad" onClick="{{p.del}}">Delete profile…</button>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+
+        <sc-if value="{{rowsEmpty}}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 40px 0; text-align: center; font-size: 14px; color: var(--muted);">{{emptyText}}</div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ============ TERMINAL PROFILES (Claude Code / Codex CLI) ============ -->
+      <sc-if value="{{showTerm}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="flex-grow: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="{{appColor}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5 6.5 8 3 11.5"></path><path d="M8.5 11.5H13"></path></svg>
+              <h1 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.015em;">{{appTitle}}</h1>
+            </div>
+            <p style="margin: 6px 0 0 0; font-size: 14px; color: var(--muted);">{{appSub}}</p>
+          </div>
+          <button class="btn" onClick="{{openNew}}">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M7 2.5v9M2.5 7h9"></path></svg>
+            New terminal profile
+          </button>
+        </div>
+
+        <div style="margin-top: 20px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 14px 16px; border-radius: 12px; background: var(--raised); font-size: 14px; line-height: 1.5;">
+          <div>
+            <span style="font-weight: 600;">Each profile opens a terminal signed in to its own account.</span>
+            <span style="color: var(--muted);"> It sets </span><span class="mono" style="font-size: 13px;">{{envVar}}</span><span style="color: var(--muted);"> to the profile's folder, then runs </span><span class="mono" style="font-size: 13px;">{{cmd}}</span><span style="color: var(--muted);">.</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted);">
+            Opens in
+            <span class="seg">
+              <sc-for list="{{terminals}}" as="o" hint-placeholder-count="3">
+                <button class="{{o.cls}}" onClick="{{o.pick}}">{{o.label}}</button>
+              </sc-for>
+            </span>
+          </div>
+        </div>
+
+        <div class="trow head" style="margin-top: 16px;">
+          <span></span>
+          <span>Profile</span>
+          <span>Folder</span>
+          <span>Last opened</span>
+          <span></span>
+          <span></span>
+        </div>
+        <sc-for list="{{termRows}}" as="p" hint-placeholder-count="2">
+          <div class="trow">
+            <label class="ck"><input type="checkbox" checked="{{p.checked}}" onChange="{{p.toggle}}" aria-label="Select {{p.name}}"></label>
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <span class="{{p.avCls}}">{{p.initial}}</span>
+              <div style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3;">
+                <span style="font-size: 14px; font-weight: 500;">{{p.name}}</span>
+                <span style="font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{p.email}}</span>
+              </div>
+            </div>
+            <span class="mono" style="font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{p.folder}}">{{p.folderShort}}</span>
+            <span style="font-size: 13px; color: var(--muted);">{{p.last}}</span>
+            <div style="display: flex; justify-content: flex-end;"><button class="btn" onClick="{{p.act}}">Open terminal</button></div>
+            <div style="position: relative;">
+              <button class="icon-btn" aria-label="More for {{p.name}}" aria-expanded="{{p.menuOpen}}" onClick="{{p.openMenu}}">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3.5" cy="8" r="1.3"></circle><circle cx="8" cy="8" r="1.3"></circle><circle cx="12.5" cy="8" r="1.3"></circle></svg>
+              </button>
+              <sc-if value="{{p.menuOpen}}" hint-placeholder-val="{{ false }}">
+                <div class="menu rise" role="menu">
+                  <button role="menuitem" onClick="{{p.edit}}">Edit name and colour</button>
+                  <button role="menuitem" onClick="{{p.signin}}">Sign in again</button>
+                  <button role="menuitem" onClick="{{p.shortcut}}">{{p.shortcutLabel}}</button>
+                  <button role="menuitem" onClick="{{p.folderAct}}">Show profile folder</button>
+                  <div class="sep"></div>
+                  <button role="menuitem" class="bad" onClick="{{p.del}}">Delete profile…</button>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+        <p style="margin: 20px 0 0 0; font-size: 13px; color: var(--muted); max-width: 640px; line-height: 1.5;">{{termNote}}</p>
+      </sc-if>
+
+      <!-- ============ GROUPS ============ -->
+      <sc-if value="{{showGroups}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="flex-grow: 1;">
+            <h1 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.015em;">Groups</h1>
+            <p style="margin: 6px 0 0 0; font-size: 14px; color: var(--muted);">Open several profiles with one click, across Claude, Codex and the terminal.</p>
+          </div>
+          <button class="btn" onClick="{{newGroup}}">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M7 2.5v9M2.5 7h9"></path></svg>
+            New group
+          </button>
+        </div>
+        <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
+          <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+            <div style="display: grid; grid-template-columns: 220px minmax(0, 1fr) auto; gap: 24px; align-items: center; padding: 18px 20px; border: 1px solid var(--border); border-radius: 12px;">
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <span style="font-size: 16px; font-weight: 600;">{{g.name}}</span>
+                <span style="font-size: 13px; color: var(--muted);">{{g.sub}}</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <sc-for list="{{g.members}}" as="m" hint-placeholder-count="3">
+                  <span style="display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 4px; border-radius: 999px; background: var(--raised); font-size: 13px;">
+                    <span class="{{m.avCls}}" style="width: 24px; height: 24px; font-size: 11px;">{{m.initial}}</span>
+                    {{m.name}}
+                    <span style="color: var(--faint);">{{m.app}}</span>
+                  </span>
+                </sc-for>
+              </div>
+              <button class="btn primary" onClick="{{g.launch}}">Launch all {{g.count}}</button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ============ APP NOT INSTALLED ============ -->
+      <sc-if value="{{showNoApp}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="flex-grow: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="dot" style="width: 10px; height: 10px; background: {{appColor}};"></span>
+              <h1 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.015em;">{{appTitle}}</h1>
+            </div>
+            <p style="margin: 6px 0 0 0; font-size: 14px; color: var(--muted);">Desktop app not found · {{noAppCount}} profiles kept</p>
+          </div>
+        </div>
+        <div style="margin-top: 96px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true"><rect x="6" y="10" width="44" height="34" rx="8" stroke="var(--control)" stroke-width="2"></rect><path d="M20 50h16" stroke="var(--control)" stroke-width="2" stroke-linecap="round"></path><circle cx="28" cy="27" r="6" fill="{{appColor}}"></circle></svg>
+          <h2 style="margin: 20px 0 0 0; font-size: 20px; font-weight: 600;">{{appTitle}} isn't installed on this computer</h2>
+          <p style="margin: 8px 0 0 0; font-size: 14px; color: var(--muted); max-width: 460px; line-height: 1.55;">Tandem opens the {{appTitle}} desktop app for each profile. Install it and Tandem finds it on its own. Your {{noAppCount}} {{appTitle}} profiles and their sign-ins are kept.</p>
+          <div style="margin-top: 24px; display: flex; gap: 10px; justify-content: center;">
+            <button class="btn" onClick="{{locateApp}}">Locate the app…</button>
+            <button class="btn primary" onClick="{{getApp}}">Get {{appTitle}}</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ CHAT HISTORY ============ -->
+      <sc-if value="{{showHistory}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="flex-grow: 1; min-width: 0;">
+            <h1 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.015em;">Chat history</h1>
+            <p style="margin: 6px 0 0 0; font-size: 14px; color: var(--muted);">Every profile's chats in one place, so you can find which account you used for what.</p>
+          </div>
+          <button class="btn" onClick="{{importExport}}">Import a data export…</button>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 12px; background: var(--raised); font-size: 14px; line-height: 1.45;">
+          <div style="flex-grow: 1; min-width: 0;">
+            <span style="font-weight: 600;">Terminal sessions update on their own.</span>
+            <span style="color: var(--muted);"> Desktop chats come from each account's data export: 3 of 6 desktop profiles imported.</span>
+          </div>
+          <button class="btn quiet" onClick="{{howExport}}">How to export</button>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; align-items: center; gap: 12px;">
+          <div style="position: relative; width: 320px; display: flex; align-items: center;">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="position: absolute; left: 12px; color: var(--faint);" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3" stroke-linecap="round"></path></svg>
+            <label for="mi-hist-q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Search chats</label>
+            <input id="mi-hist-q" class="field" style="height: 34px; padding-left: 34px;" placeholder="Search chats" value="{{histQuery}}" onChange="{{onHistQuery}}">
+          </div>
+          <span class="seg">
+            <sc-for list="{{histFilters}}" as="o" hint-placeholder-count="5"><button class="{{o.cls}}" onClick="{{o.pick}}">{{o.label}}</button></sc-for>
+          </span>
+          <span style="flex-grow: 1;"></span>
+          <span class="num" style="font-size: 13px; color: var(--muted);">{{histCount}}</span>
+        </div>
+
+        <div style="margin-top: 16px; display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 24px; height: 452px;">
+          <div style="overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding-right: 4px;">
+            <sc-for list="{{chats}}" as="c" hint-placeholder-count="5">
+              <button class="{{c.cls}}" onClick="{{c.pick}}" aria-pressed="{{c.selAria}}">
+                <span style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                  <span class="{{c.avCls}}" style="width: 22px; height: 22px; font-size: 11px;">{{c.initial}}</span>
+                  <span style="font-size: 12px; color: var(--muted); white-space: nowrap;">{{c.profile}} · {{c.appName}}</span>
+                  <span style="flex-grow: 1;"></span>
+                  <span class="num" style="font-size: 12px; color: var(--muted); white-space: nowrap;">{{c.when}}</span>
+                </span>
+                <span style="display: block; width: 100%; margin-top: 6px; font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{c.title}}</span>
+                <span style="display: block; width: 100%; margin-top: 2px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{c.snippet}}</span>
+              </button>
+            </sc-for>
+            <sc-if value="{{chatsEmpty}}" hint-placeholder-val="{{ false }}">
+              <div style="padding: 40px 0; text-align: center; font-size: 14px; color: var(--muted);">No chats match. Try another word or show all apps.</div>
+            </sc-if>
+          </div>
+
+          <div style="border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; min-height: 0; overflow: hidden;">
+            <sc-if value="{{hasChat}}" hint-placeholder-val="{{ true }}">
+              <div style="padding: 18px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--rule);">
+                <div style="flex-grow: 1; min-width: 0;">
+                  <h2 style="margin: 0; font-size: 17px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{chat.title}}</h2>
+                  <div style="margin-top: 4px; font-size: 13px; color: var(--muted);">{{chat.meta}}</div>
+                </div>
+                <button class="btn quiet" onClick="{{copyChat}}">Copy</button>
+                <button class="btn primary" onClick="{{chat.open}}">{{chat.openLabel}}</button>
+              </div>
+              <div style="flex: 1 1 auto; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 18px;">
+                <sc-for list="{{chat.messages}}" as="m" hint-placeholder-count="4">
+                  <div style="max-width: 680px;">
+                    <div style="font-size: 12px; font-weight: 600; color: {{m.color}};">{{m.who}}</div>
+                    <div style="margin-top: 4px; font-size: 14px; line-height: 1.55; white-space: pre-line;">{{m.text}}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ SETTINGS ============ -->
+      <sc-if value="{{showSettings}}" hint-placeholder-val="{{ false }}">
+        <div style="max-width: 820px; margin: 0 auto;">
+        <h1 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.015em;">Settings</h1>
+        <p style="margin: 6px 0 0 0; font-size: 14px; color: var(--muted);">Changes save as you make them.</p>
+
+        <h2 style="margin: 32px 0 4px 0; font-size: 16px; font-weight: 600;">General</h2>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">After launching a profile</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">What this window does once an app opens</div></div>
+            <div class="seg" style="justify-self: start;">
+              <sc-for list="{{afterOpts}}" as="o" hint-placeholder-count="3"><button class="{{o.cls}}" onClick="{{o.pick}}">{{o.label}}</button></sc-for>
+            </div>
+          </div>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">{{trayLabel}}</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">Launch any profile or group without opening this window</div></div>
+            <button class="{{trayCls}}" role="switch" aria-checked="{{trayOn}}" aria-label="{{trayLabel}}" onClick="{{toggleTray}}"></button>
+          </div>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">Open at login</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">Starts quietly in the {{trayWord}}</div></div>
+            <button class="{{loginCls}}" role="switch" aria-checked="{{loginOn}}" aria-label="Open at login" onClick="{{toggleLogin}}"></button>
+          </div>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">Quick launch shortcut</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">Opens the {{trayWord}} menu from anywhere</div></div>
+            <div style="display: flex; align-items: center; gap: 12px;"><span class="mono" style="font-size: 13px; padding: 6px 12px; border-radius: 8px; background: var(--raised);">{{globalShortcut}}</span><button class="btn quiet" onClick="{{changeShortcut}}">Change</button></div>
+          </div>
+
+        <h2 style="margin: 32px 0 4px 0; font-size: 16px; font-weight: 600;">Appearance</h2>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">Theme</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">System follows your computer's light or dark setting</div></div>
+            <div class="seg" style="justify-self: start;">
+              <sc-for list="{{appearOpts}}" as="o" hint-placeholder-count="3"><button class="{{o.cls}}" onClick="{{o.pick}}">{{o.label}}</button></sc-for>
+            </div>
+          </div>
+
+        <h2 style="margin: 32px 0 4px 0; font-size: 16px; font-weight: 600;">Usage limits</h2>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">Refresh usage</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">How often limits are checked for every signed-in profile</div></div>
+            <div class="seg" style="justify-self: start;">
+              <sc-for list="{{refreshOpts}}" as="o" hint-placeholder-count="4"><button class="{{o.cls}}" onClick="{{o.pick}}">{{o.label}}</button></sc-for>
+            </div>
+          </div>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">Warn me near a limit</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">A notification when a running profile passes 85%, with the account that has the most room</div></div>
+            <button class="{{warnCls}}" role="switch" aria-checked="{{warnOn}}" aria-label="Warn me near a limit" onClick="{{toggleWarn}}"></button>
+          </div>
+
+        <h2 style="margin: 32px 0 4px 0; font-size: 16px; font-weight: 600;">Terminal profiles</h2>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">Open terminal profiles in</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">Used by Claude Code and Codex CLI profiles</div></div>
+            <div class="seg" style="justify-self: start;">
+              <sc-for list="{{terminals}}" as="o" hint-placeholder-count="3"><button class="{{o.cls}}" onClick="{{o.pick}}">{{o.label}}</button></sc-for>
+            </div>
+          </div>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">Keep accounts separate</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">Ignore API keys set on this computer, so each profile uses its own sign-in</div></div>
+            <button class="{{keysCls}}" role="switch" aria-checked="{{keysOn}}" aria-label="Keep accounts separate" onClick="{{toggleKeys}}"></button>
+          </div>
+
+        <h2 style="margin: 32px 0 4px 0; font-size: 16px; font-weight: 600;">Apps and storage</h2>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">Apps found</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">Detected automatically</div></div>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+              <div style="display: flex; gap: 10px; align-items: center;"><span class="dot" style="background: var(--claude);"></span><span style="width: 110px;">Claude</span><span class="num" style="color: var(--muted);">1.4.2</span><span class="mono" style="color: var(--muted); font-size: 12px;">{{claudePath}}</span></div>
+              <div style="display: flex; gap: 10px; align-items: center;"><span class="dot" style="background: var(--codex);"></span><span style="width: 110px;">Codex</span><span class="num" style="color: var(--muted);">0.9.1</span><span class="mono" style="color: var(--muted); font-size: 12px;">{{codexPath}}</span></div>
+              <div style="display: flex; gap: 10px; align-items: center;"><span class="dot idle"></span><span style="width: 110px;">Claude Code</span><span class="num" style="color: var(--muted);">2.1.8</span><span class="mono" style="color: var(--muted); font-size: 12px;">claude</span></div>
+              <div style="display: flex; gap: 10px; align-items: center;"><span class="dot idle"></span><span style="width: 110px;">Codex CLI</span><span class="num" style="color: var(--muted);">0.48.0</span><span class="mono" style="color: var(--muted); font-size: 12px;">codex</span></div>
+            </div>
+          </div>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">Profiles folder</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">Where each profile's sign-in and data live</div></div>
+            <div style="display: flex; align-items: center; gap: 12px;"><span class="mono" style="font-size: 12px; color: var(--muted);">{{profilesPath}}</span><button class="btn" onClick="{{showFolder}}">Show folder</button></div>
+          </div>
+
+        <h2 style="margin: 32px 0 4px 0; font-size: 16px; font-weight: 600;">About</h2>
+          <div class="set-row">
+            <div><div style="font-size: 14px; font-weight: 500;">Tandem 1.0.0</div><div style="font-size: 13px; color: var(--muted); margin-top: 2px;">You're up to date. Checked today at 2:31 PM</div></div>
+            <div style="display: flex; align-items: center; gap: 12px;"><button class="btn" onClick="{{checkUpdates}}">Check for updates</button><button class="btn quiet" onClick="{{openSource}}">Source on GitHub</button></div>
+          </div>
+      </div>
+      </sc-if>
+
+      <!-- toast -->
+      <sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+        <div class="rise" role="status" style="position: sticky; bottom: 0; margin-top: 24px; display: flex; justify-content: center; pointer-events: none;">
+          <div style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 999px; background: var(--primary-bg); color: var(--primary-ink); font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.18);">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7.5 2.5 2.5L11 4.5"></path></svg>
+            {{toast}}
+          </div>
+        </div>
+      </sc-if>
+    </main>
+  </div>
+
+  <!-- click-away layer for open menus -->
+  <sc-if value="{{menuOpenAny}}" hint-placeholder-val="{{ false }}">
+    <button aria-label="Close menu" onClick="{{closeMenu}}" style="position: absolute; inset: 0; z-index: 10; background: transparent; border: 0; cursor: default;"></button>
+  </sc-if>
+
+  <!-- ============ SHEETS ============ -->
+  <sc-if value="{{sheetOpen}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; z-index: 30; background: var(--overlay); display: flex; align-items: center; justify-content: center;">
+      <div class="rise" role="dialog" aria-modal="true" aria-labelledby="mi-sheet-title" onKeyDown="{{onSheetKey}}" style="width: 480px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 24px 64px rgba(0,0,0,.28); padding: 24px;">
+
+        <!-- New profile -->
+        <sc-if value="{{sheetNew}}" hint-placeholder-val="{{ true }}">
+          <h2 id="mi-sheet-title" style="margin: 0; font-size: 18px; font-weight: 600;">New profile</h2>
+          <p style="margin: 6px 0 0 0; font-size: 14px; color: var(--muted); line-height: 1.5;">A profile keeps its own sign-in, chats and settings, so each one can use a different account.</p>
+          <div style="margin-top: 20px; font-size: 13px; font-weight: 500;">App</div>
+          <div class="seg" style="margin-top: 8px;">
+            <sc-for list="{{newAppOpts}}" as="o" hint-placeholder-count="4"><button class="{{o.cls}}" onClick="{{o.pick}}">{{o.label}}</button></sc-for>
+          </div>
+          <label for="mi-new-name" style="display: block; margin-top: 18px; font-size: 13px; font-weight: 500;">Name</label>
+          <input id="mi-new-name" class="field" autoFocus="{{ true }}" style="margin-top: 8px;" placeholder="For example: Client work" value="{{newName}}" onChange="{{onNewName}}">
+          <div style="min-height: 18px; margin-top: 6px; font-size: 12px; color: var(--negative);">{{newError}}</div>
+          <div style="margin-top: 6px; font-size: 13px; font-weight: 500;">Colour</div>
+          <div style="margin-top: 10px; display: flex; gap: 10px;">
+            <sc-for list="{{swatches}}" as="w" hint-placeholder-count="6"><button class="{{w.cls}}" aria-label="{{w.label}}" aria-pressed="{{w.sel}}" onClick="{{w.pick}}">{{w.initial}}</button></sc-for>
+          </div>
+          <div style="margin-top: 20px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; background: var(--raised);">
+            <div style="flex-grow: 1;"><div style="font-size: 14px; font-weight: 500;">Sign in now</div><div style="font-size: 12px; color: var(--muted); margin-top: 2px;">{{signinHint}}</div></div>
+            <button class="{{newSigninCls}}" role="switch" aria-checked="{{newSignin}}" aria-label="Sign in now" onClick="{{toggleNewSignin}}"></button>
+          </div>
+          <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button class="btn" onClick="{{closeSheet}}">Cancel</button>
+            <button class="btn primary" onClick="{{createProfile}}" disabled="{{createDisabled}}">Create profile</button>
+          </div>
+        </sc-if>
+
+        <!-- Sign-in flow -->
+        <sc-if value="{{sheetSignin}}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{signinFailed}}" hint-placeholder-val="{{ false }}">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--tint-rose-bg); color: var(--negative); display: flex; align-items: center; justify-content: center;">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M11 6v6"></path><circle cx="11" cy="16" r="0.6" fill="currentColor"></circle></svg>
+            </div>
+            <h2 id="mi-sheet-title" style="margin: 16px 0 0 0; font-size: 18px; font-weight: 600;">Sign-in didn't finish</h2>
+            <p style="margin: 8px 0 0 0; font-size: 14px; color: var(--muted); line-height: 1.55;">The {{signinApp}} window was closed before you signed in. Nothing was changed, and {{signinName}} is still signed out.</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 10px;">
+              <button class="btn" onClick="{{closeSheet}}">Cancel</button>
+              <button class="btn primary" onClick="{{retrySignin}}">Try again</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{signinWaiting}}" hint-placeholder-val="{{ true }}">
+            <h2 id="mi-sheet-title" style="margin: 0; font-size: 18px; font-weight: 600;">Sign in to {{signinApp}}</h2>
+            <p style="margin: 8px 0 0 0; font-size: 14px; color: var(--muted); line-height: 1.55;">{{signinBody}}</p>
+            <div style="margin-top: 20px; display: flex; align-items: center; gap: 12px;">
+              <span class="{{signinAvCls}}">{{signinInitial}}</span>
+              <div style="flex-grow: 1;"><div style="font-size: 14px; font-weight: 500;">{{signinName}}</div><div style="font-size: 12px; color: var(--muted); margin-top: 2px;">Waiting for you to sign in…</div></div>
+            </div>
+            <div class="wait" style="margin-top: 16px;" role="progressbar" aria-label="Waiting for sign-in"></div>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 10px;">
+              <button class="btn" onClick="{{closeSheet}}">Cancel sign-in</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{signinDone}}" hint-placeholder-val="{{ false }}">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--tint-green-bg); color: var(--positive); display: flex; align-items: center; justify-content: center;">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 11.5 4 4L17 7"></path></svg>
+            </div>
+            <h2 id="mi-sheet-title" style="margin: 16px 0 0 0; font-size: 18px; font-weight: 600;">{{signinName}} is ready</h2>
+            <p style="margin: 6px 0 0 0; font-size: 14px; color: var(--muted);">Signed in as new@example.com on a Pro plan.</p>
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 10px;">
+              <button class="btn" onClick="{{closeSheet}}">Done</button>
+              <button class="btn primary" onClick="{{launchSignedIn}}">Launch {{signinName}}</button>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <!-- Edit -->
+        <sc-if value="{{sheetEdit}}" hint-placeholder-val="{{ false }}">
+          <h2 id="mi-sheet-title" style="margin: 0; font-size: 18px; font-weight: 600;">Edit profile</h2>
+          <label for="mi-edit-name" style="display: block; margin-top: 18px; font-size: 13px; font-weight: 500;">Name</label>
+          <input id="mi-edit-name" class="field" autoFocus="{{ true }}" style="margin-top: 8px;" value="{{editName}}" onChange="{{onEditName}}">
+          <div style="min-height: 18px; margin-top: 6px; font-size: 12px; color: var(--negative);">{{editError}}</div>
+          <div style="margin-top: 6px; font-size: 13px; font-weight: 500;">Colour</div>
+          <div style="margin-top: 10px; display: flex; gap: 10px;">
+            <sc-for list="{{editSwatches}}" as="w" hint-placeholder-count="6"><button class="{{w.cls}}" aria-label="{{w.label}}" aria-pressed="{{w.sel}}" onClick="{{w.pick}}">{{w.initial}}</button></sc-for>
+          </div>
+          <p style="margin: 16px 0 0 0; font-size: 12px; color: var(--muted);">{{editNote}}</p>
+          <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button class="btn" onClick="{{closeSheet}}">Cancel</button>
+            <button class="btn primary" onClick="{{saveEdit}}" disabled="{{saveDisabled}}">Save</button>
+          </div>
+        </sc-if>
+
+        <!-- Delete -->
+        <sc-if value="{{sheetDelete}}" hint-placeholder-val="{{ false }}">
+          <h2 id="mi-sheet-title" style="margin: 0; font-size: 18px; font-weight: 600;">Delete “{{delName}}”?</h2>
+          <p style="margin: 8px 0 0 0; font-size: 14px; color: var(--muted); line-height: 1.55;">This removes the profile's folder and signs that account out on this computer. The account itself, and its chats in the cloud, are not affected. This can't be undone.</p>
+          <sc-if value="{{delRunning}}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 12px 0 0 0; font-size: 13px; color: var(--negative);">{{delName}} is running. It will be closed first.</p>
+          </sc-if>
+          <label for="mi-del-name" style="display: block; margin-top: 18px; font-size: 13px; font-weight: 500;">Type <span class="mono">{{delName}}</span> to confirm</label>
+          <input id="mi-del-name" class="field" style="margin-top: 8px;" value="{{delTyped}}" onChange="{{onDelTyped}}" autocomplete="off">
+          <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button class="btn" onClick="{{closeSheet}}">Cancel</button>
+            <button class="btn danger" onClick="{{confirmDelete}}" disabled="{{delDisabled}}">{{delLabel}}</button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ FIRST LAUNCH ============ -->
+  <sc-if value="{{welcome}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; z-index: 45; background: var(--ground); display: flex; align-items: center; justify-content: center;">
+      <div class="rise" style="width: 540px; display: flex; flex-direction: column; align-items: center;">
+        <svg width="64" height="64" viewBox="0 0 48 48" aria-hidden="true">
+          <rect x="7" y="4" width="15" height="32" rx="7.5" fill="var(--claude)"></rect>
+          <rect x="26" y="12" width="15" height="32" rx="7.5" fill="var(--codex)"></rect>
+        </svg>
+        <h1 style="margin: 20px 0 0 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em; text-align: center;">Welcome to Tandem</h1>
+        <p style="margin: 8px 0 0 0; font-size: 15px; color: var(--muted); text-align: center; line-height: 1.5;">Run several Claude and Codex accounts side by side, each with its own sign-in.</p>
+
+        <div style="margin-top: 28px; width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px;">
+          <div style="font-size: 13px; font-weight: 600;">Apps on this computer</div>
+          <div style="margin-top: 10px; display: flex; flex-direction: column;">
+            <sc-for list="{{foundApps}}" as="a" hint-placeholder-count="4">
+              <div style="display: grid; grid-template-columns: 8px minmax(0, 1fr) 72px 120px; column-gap: 12px; align-items: center; height: 36px; font-size: 14px;">
+                <span class="dot" style="background: {{a.color}};"></span>
+                <span>{{a.name}}</span>
+                <span class="num" style="font-size: 13px; color: var(--muted);">{{a.version}}</span>
+                <span style="font-size: 13px; text-align: right; color: {{a.statusColor}};">{{a.status}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-top: 12px; width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px;">
+          <div style="font-size: 13px; font-weight: 600;">Bring over your profiles</div>
+          <div style="margin-top: 4px; font-size: 13px; color: var(--muted); line-height: 1.45;">Found on this computer. They keep their sign-ins; your usual Claude login stays as the Main instance.</div>
+          <label style="margin-top: 12px; display: flex; align-items: center; gap: 12px; height: 44px; cursor: pointer;">
+            <input type="checkbox" checked="{{importFD}}" onChange="{{toggleImport}}" style="width: 18px; height: 18px; margin: 0; accent-color: var(--text);">
+            <span class="av tint-blue">F</span>
+            <span style="display: flex; flex-direction: column; line-height: 1.3; flex-grow: 1;"><span style="font-size: 14px; font-weight: 500;">FD_Work</span><span style="font-size: 12px; color: var(--muted);">Claude · signed in</span></span>
+          </label>
+        </div>
+
+        <div style="margin-top: 24px; width: 100%; display: flex; justify-content: center; gap: 10px;">
+          <button class="btn" onClick="{{startFresh}}">Start fresh</button>
+          <button class="btn primary" onClick="{{finishWelcome}}">{{welcomeCta}}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ MINIMISED TO TRAY (what happens after Launch) ============ -->
+  <sc-if value="{{minimized}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; z-index: 40; background: var(--ground); display: flex;">
+      <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 32px; gap: 10px;">
+        <div style="font-size: 28px; font-weight: 600; letter-spacing: -0.02em;">{{minTitle}}</div>
+        <div style="font-size: 15px; color: var(--muted); max-width: 440px; line-height: 1.5;">{{minBody}}</div>
+        <div style="margin-top: 12px;"><button class="btn primary" onClick="{{restore}}">Open Tandem</button></div>
+      </div>
+      <div style="padding: 0 32px 32px 0; display: flex; align-items: flex-end;">
+        <dc-import name="Tray" theme="{{theme}}" platform="{{platform}}" on-open="{{restore}}" hint-size="360px,600px"></dc-import>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Preview"},"platform":{"editor":"enum","options":["mac","windows"],"default":"mac","section":"Preview"},"screen":{"editor":"enum","options":["claude","codex","cc","cx","groups","history","settings","welcome","new","signin","signed","signinfail","edit","delete","menu","multi","minimized","signedout","search","usagefail","noapp"],"default":"claude","section":"Preview"},"height":{"editor":"int","default":800,"min":600,"max":1600,"section":"Preview"},"$preview":{"width":1280,"height":800}}'>
+const TINTS = ['graphite','blue','green','amber','rose','teal'];
+const APPS = {
+  claude: { title: 'Claude', kind: 'desktop', version: '1.4.2' },
+  codex:  { title: 'Codex',  kind: 'desktop', version: '0.9.1' },
+  cc:     { title: 'Claude Code', kind: 'term', env: 'CLAUDE_CONFIG_DIR', cmd: 'claude' },
+  cx:     { title: 'Codex CLI',   kind: 'term', env: 'CODEX_HOME', cmd: 'codex' }
+};
+const SEED = [
+  { id: 'c0', app: 'claude', name: 'Main instance', email: 'Your usual Claude login', plan: 'Max', tint: 'graphite', main: true, signedIn: true, running: true,  u5: 22, r5: '5:10 PM', u7: 41, r7: 'Mon 9:00 AM' },
+  { id: 'c1', app: 'claude', name: 'FD_Work',   email: 'work@example.com',      plan: 'Team', tint: 'blue',  signedIn: true, running: true,  u5: 71, r5: '3:55 PM', u7: 58, r7: 'Sun 6:00 PM' },
+  { id: 'c2', app: 'claude', name: 'Personal',  email: 'me@example.com',        plan: 'Pro',  tint: 'green', signedIn: true, running: false, u5: 6,  r5: '4:10 PM', u7: 19, r7: 'Tue 11:00 AM' },
+  { id: 'c3', app: 'claude', name: 'Freelance', email: 'studio@example.com',    plan: 'Pro',  tint: 'amber', signedIn: true, running: false, u5: 92, r5: '3:20 PM', u7: 87, r7: 'Thu 8:00 AM' },
+  { id: 'c4', app: 'claude', name: 'Testing',   email: 'Not signed in',         plan: '—',    tint: 'rose',  signedIn: false, running: false },
+  { id: 'x0', app: 'codex',  name: 'Main instance', email: 'Your usual Codex login', plan: 'Plus', tint: 'graphite', main: true, signedIn: true, running: false, u5: 35, r5: '6:40 PM', u7: 12, r7: 'Sat 2:00 PM' },
+  { id: 'x1', app: 'codex',  name: 'Work',      email: 'work@example.com',      plan: 'Pro',  tint: 'blue',  signedIn: true, running: true,  u5: 64, r5: '4:45 PM', u7: 40, r7: 'Sun 6:00 PM' },
+  { id: 'x2', app: 'codex',  name: 'Personal',  email: 'me@example.com',        plan: 'Plus', tint: 'green', signedIn: true, running: false, u5: 0,  r5: '—', u7: 3, r7: 'Wed 10:00 AM' },
+  { id: 't1', app: 'cc', name: 'FD_Work',  email: 'work@example.com · Team', tint: 'blue',  folder: 'D:\\Shahid\\Tandem\\ClaudeCodeProfiles\\FD_Work', last: 'Today, 1:12 PM' },
+  { id: 't2', app: 'cc', name: 'Personal', email: 'me@example.com · Pro',    tint: 'green', folder: 'D:\\Shahid\\Tandem\\ClaudeCodeProfiles\\Personal', last: 'Yesterday' },
+  { id: 't3', app: 'cx', name: 'Work',     email: 'work@example.com · Pro',  tint: 'blue',  folder: 'D:\\Shahid\\Tandem\\CodexCliProfiles\\Work', last: 'Mon, 4:30 PM' }
+];
+const GROUPS = [
+  { id: 'g1', name: 'Work trio', sub: 'Weekdays, first thing', members: ['c1', 'x1', 't1'] },
+  { id: 'g2', name: 'Personal',  sub: 'Evenings and weekends', members: ['c2', 'x2', 't2'] }
+];
+const APP_SHORT = { claude: 'Claude', codex: 'Codex', cc: 'Claude Code', cx: 'Codex CLI' };
+const CHATS = [
+  { id: 'h1', app: 'cc', pid: 't1', when: 'Today 1:12 PM', src: 'Terminal session', n: 24, title: 'Fix the Codex Free usage window', snippet: 'Codex Free reports a 30-day window, so the label should read 30d, not 7d…',
+    messages: [
+      ['you', 'The usage row shows 7d for my Codex Free account, but the reset is a month away. Can you check the parser?'],
+      ['ai', 'The window length comes back as 2,592,000 seconds for Free plans. The label function only knows 5 hours and 7 days, so it falls back to 7d. I’ll add a 30-day case and use the window length the server sends instead of guessing.'],
+      ['you', 'Good. Keep the reset time per row too.'],
+      ['ai', 'Done. Each row now carries its own reset time, and the Free plan shows “30d” with the right date.']
+    ] },
+  { id: 'h2', app: 'claude', pid: 'c1', when: 'Oct 21', src: 'From export, Oct 22', n: 41, title: 'Kiosk touch latency checklist', snippet: 'A short list of things to measure before blaming the touch frame…',
+    messages: [
+      ['you', 'Our kiosk feels laggy on touch. What should I measure first?'],
+      ['ai', 'Start with three numbers: the touch frame’s report rate, the time from touch to the first frame that changes, and the display’s own input lag. Most “laggy” screens turn out to be the display, not the sensor.'],
+      ['you', 'How do I measure touch-to-frame without special gear?'],
+      ['ai', 'Film the screen and your finger with a phone at 240 fps, then count frames between contact and the first visible change. Each frame is about 4 ms.']
+    ] },
+  { id: 'h3', app: 'cx', pid: 't3', when: 'Mon 4:30 PM', src: 'Terminal session', n: 12, title: 'Refactor desktop shortcut creation', snippet: 'Move the PowerShell shortcut script into one helper and pass values as env vars…',
+    messages: [
+      ['you', 'Clean up how shortcuts are created. It builds a PowerShell string by hand.'],
+      ['ai', 'I moved it into one helper that passes the target, arguments and icon as environment variables, so names with quotes or spaces can’t break the script.']
+    ] },
+  { id: 'h4', app: 'claude', pid: 'c2', when: 'Oct 19', src: 'From export, Oct 20', n: 9, title: 'Weekend trip packing list', snippet: 'Two nights, carry-on only, one dinner out…',
+    messages: [
+      ['you', 'Packing list for two nights, carry-on only, one nice dinner.'],
+      ['ai', 'Clothes: two tops, one pair of trousers you can wear to dinner, one jumper, sleepwear. Shoes: the ones you travel in plus one smarter pair. Wash bag in a clear pouch, chargers in one small bag.']
+    ] },
+  { id: 'h5', app: 'cc', pid: 't2', when: 'Yesterday', src: 'Terminal session', n: 17, title: 'Set up a Python venv for the scraper', snippet: 'Create the venv inside the project, pin requests and lxml…',
+    messages: [
+      ['you', 'Set up a venv for the scraper project and pin the dependencies.'],
+      ['ai', 'Created .venv in the project folder, installed requests and lxml, and wrote requirements.txt with exact versions. Run it with .venv\\Scripts\\python scrape.py.']
+    ] },
+  { id: 'h6', app: 'codex', pid: 'x1', when: 'Oct 17', src: 'From export, Oct 18', n: 6, title: 'Release notes for version 2.0', snippet: 'Three headline changes and a short list of fixes…',
+    messages: [
+      ['you', 'Write short release notes for 2.0: tray menu, groups, faster usage refresh.'],
+      ['ai', 'Tandem 2.0 adds a tray menu for one-click launching, groups that open several profiles together, and usage that refreshes in the background every five minutes.']
+    ] },
+  { id: 'h7', app: 'claude', pid: 'c3', when: 'Oct 9', src: 'From export, Oct 10', n: 14, title: 'Questions to ask before a logo brief', snippet: 'Who it’s for, where it will be seen most, and what it must never look like…',
+    messages: [
+      ['you', 'What should I ask a client before starting a logo?'],
+      ['ai', 'Who the main audience is, where the logo will be seen most (a phone icon, a sign, a shirt), three brands they admire and why, and one thing it must never look like.']
+    ] }
+];
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      section: 'claude', tab: 'all', query: '',
+      profiles: SEED.map((p) => ({ ...p })), checked: {}, menu: null,
+      sheet: null, target: null,
+      newApp: 'claude', newName: '', newTint: 'teal', newSignin: true,
+      editName: '', editTint: 'blue', delTyped: '', signinDone: false,
+      toast: '', minimized: false, lastLaunched: [],
+      appearance: 'system', after: 'minimize', tray: true, login: true, refresh: '5 min', terminal: 'Windows Terminal',
+      warn: true, keys: true,
+      histFilter: 'all', histQuery: '', histSel: 'h1',
+      welcome: false, importFD: true, noApp: null, usageErr: false, expired: {}, signinFailed: false,
+      ...Component.preset(props.screen)
+    };
+  }
+  static preset(screen) {
+    const P = {
+      claude: {}, codex: { section: 'codex' }, cc: { section: 'cc' }, cx: { section: 'cx' },
+      groups: { section: 'groups' }, settings: { section: 'settings' },
+      new: { sheet: 'new', newApp: 'claude', newName: 'Client work', newTint: 'teal' },
+      signin: { sheet: 'signin', target: 'c4', signinDone: false },
+      signed: { sheet: 'signin', target: 'c4', signinDone: true },
+      edit: { sheet: 'edit', target: 'c3', editName: 'Freelance', editTint: 'amber' },
+      delete: { sheet: 'delete', target: 'c3', delTyped: 'Free' },
+      menu: { menu: 'c1' },
+      multi: { checked: { c2: true, c3: true } },
+      minimized: { minimized: true, lastLaunched: ['Personal', 'Freelance'] },
+      signedout: { tab: 'out' },
+      search: { query: 'free' },
+      history: { section: 'history', histSel: 'h1' },
+      welcome: { welcome: true },
+      noapp: { section: 'codex', noApp: 'codex' },
+      signinfail: { sheet: 'signin', target: 'c4', signinFailed: true },
+      usagefail: { usageErr: true, expired: { c3: true } }
+    };
+    return P[screen] || {};
+  }
+  componentDidUpdate(prev) {
+    if (prev.screen !== this.props.screen) {
+      this.setState({ section: 'claude', tab: 'all', query: '', checked: {}, menu: null, sheet: null, minimized: false, welcome: false, noApp: null, usageErr: false, expired: {}, signinFailed: false, ...Component.preset(this.props.screen) });
+    }
+  }
+  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._s); }
+  flash(msg) { clearTimeout(this._t); this.setState({ toast: msg }); this._t = setTimeout(() => this.setState({ toast: '' }), 2600); }
+  byId(id) { return this.state.profiles.find((p) => p.id === id); }
+  setP(id, patch) { this.setState({ profiles: this.state.profiles.map((p) => p.id === id ? { ...p, ...patch } : p) }); }
+
+  launch(ids) {
+    const names = ids.map((id) => this.byId(id)).filter(Boolean).map((p) => p.name);
+    const profiles = this.state.profiles.map((p) => ids.includes(p.id) && APPS[p.app].kind === 'desktop' ? { ...p, running: true } : p);
+    if (this.state.after === 'minimize') {
+      this.setState({ profiles, checked: {}, menu: null, sheet: null, minimized: true, lastLaunched: names });
+    } else {
+      this.setState({ profiles, checked: {}, menu: null, sheet: null });
+      this.flash('Launched ' + names.join(', '));
+    }
+  }
+  validName(name, exceptId, app) {
+    const n = name.trim();
+    if (!n) return '';
+    if (/[<>:"\/\\|?*]/.test(n)) return 'Names can\u2019t contain < > : " / \\ | ? *';
+    if (this.state.profiles.some((p) => p.app === app && p.id !== exceptId && p.name.toLowerCase() === n.toLowerCase())) return 'A profile called \u201c' + n + '\u201d already exists.';
+    return '';
+  }
+
+  renderVals() {
+    const s = this.state;
+    const theme = this.props.theme ?? (s.appearance === 'dark' ? 'dark' : 'light');
+    const platform = this.props.platform ?? 'mac';
+    const app = APPS[s.section];
+    const q = s.query.trim().toLowerCase();
+    const inApp = (k) => s.profiles.filter((p) => p.app === k);
+    const avCls = (t) => 'av tint-' + t;
+    const initial = (n) => n === 'Main instance' ? 'M' : n.replace(/[^A-Za-z0-9]/g, '').slice(0, 1).toUpperCase();
+    const color = { claude: 'var(--claude)', codex: 'var(--codex)', cc: 'var(--claude)', cx: 'var(--codex)' };
+    const go = (k) => () => this.setState({ section: k, tab: 'all', checked: {}, menu: null });
+
+    const navItem = (k) => ({ label: APPS[k].title, count: inApp(k).length, color: color[k], cls: 'nav' + (s.section === k ? ' on' : ''), current: s.section === k ? 'page' : 'false', go: go(k) });
+
+    // ---------- desktop rows ----------
+    let list = app && app.kind === 'desktop' ? inApp(s.section) : [];
+    const counts = { all: list.length, running: list.filter((p) => p.running).length, out: list.filter((p) => !p.signedIn).length };
+    if (s.tab === 'running') list = list.filter((p) => p.running);
+    if (s.tab === 'out') list = list.filter((p) => !p.signedIn);
+    if (q) list = list.filter((p) => (p.name + ' ' + p.email).toLowerCase().includes(q));
+    const checkedIds = Object.keys(s.checked).filter((k) => s.checked[k] && this.byId(k) && this.byId(k).app === s.section);
+
+    const menuFns = (p) => ({
+      menuOpen: s.menu === p.id,
+      openMenu: () => this.setState({ menu: s.menu === p.id ? null : p.id }),
+      edit: () => this.setState({ menu: null, sheet: 'edit', target: p.id, editName: p.name, editTint: p.tint }),
+      signin: () => this.setState({ menu: null, sheet: 'signin', target: p.id, signinDone: false }, () => this.startSignin()),
+      addGroup: () => { this.setState({ menu: null }); this.flash(p.name + ' added to Work trio'); },
+      shortcutLabel: p.shortcut ? 'Remove desktop shortcut' : 'Create desktop shortcut',
+      shortcut: () => { this.setP(p.id, { shortcut: !p.shortcut }); this.setState({ menu: null }); this.flash(p.shortcut ? 'Shortcut removed from the desktop' : 'Shortcut for ' + p.name + ' added to the desktop'); },
+      del: () => this.setState({ menu: null, sheet: 'delete', target: p.id, delTyped: '' })
+    });
+
+    const rows = list.map((p) => {
+      const actLabel = !p.signedIn ? 'Sign in' : p.running ? 'Close' : 'Launch';
+      return {
+        ...p, ...menuFns(p),
+        initial: initial(p.name), avCls: avCls(p.tint),
+        rowCls: 'row' + (s.checked[p.id] ? ' sel' : ''),
+        checked: !!s.checked[p.id], noCheck: !p.signedIn,
+        toggle: () => this.setState({ checked: { ...s.checked, [p.id]: !s.checked[p.id] } }),
+        status: !p.signedIn ? 'Signed out' : p.running ? 'Running' : 'Idle',
+        dotCls: 'dot ' + (!p.signedIn ? 'out' : p.running ? 'run' : 'idle'),
+        hasUsage: !!p.signedIn && !s.expired[p.id], noUsage: !p.signedIn, expired: !!p.signedIn && !!s.expired[p.id],
+        f5Cls: 'fill' + (p.u5 >= 85 ? ' hot' : ''), f7Cls: 'fill' + (p.u7 >= 85 ? ' hot' : ''),
+        t5Cls: p.u5 >= 85 ? 'hot-text' : '', t7Cls: p.u7 >= 85 ? 'hot-text' : '',
+        near5: p.u5 >= 85 ? ' near limit' : '', near7: p.u7 >= 85 ? ' near limit' : '',
+        u5Aria: (p.u5 || 0) + ' percent of the 5-hour limit used', u7Aria: (p.u7 || 0) + ' percent of the weekly limit used',
+        actLabel, actCls: 'btn' + (actLabel === 'Launch' ? '' : ' quiet'),
+        act: () => {
+          if (!p.signedIn) return this.setState({ sheet: 'signin', target: p.id, signinDone: false }, () => this.startSignin());
+          if (p.running) { this.setP(p.id, { running: false }); return this.flash(p.name + ' closed'); }
+          this.launch([p.id]);
+        },
+        editable: !p.main,
+        signinLabel: p.signedIn ? 'Sign in again' : 'Sign in',
+        folder: () => { this.setState({ menu: null }); this.flash('Opened the folder for ' + p.name); }
+      };
+    });
+
+    // the finding: most headroom on the 5-hour limit
+    const ready = (app && app.kind === 'desktop' ? inApp(s.section) : []).filter((p) => p.signedIn);
+    const bestP = ready.slice().sort((a, b) => a.u5 - b.u5)[0];
+    const best = bestP ? {
+      name: bestP.name, initial: initial(bestP.name), avCls: avCls(bestP.tint),
+      detail: bestP.u5 + '% of its 5-hour limit used' + (bestP.r5 !== '—' ? ', resets at ' + bestP.r5 : '') + '; ' + bestP.u7 + '% of the weekly limit.',
+      cta: bestP.running ? 'Already running' : 'Launch ' + bestP.name,
+      launch: () => bestP.running ? this.flash(bestP.name + ' is already open') : this.launch([bestP.id])
+    } : { name: '—', initial: '', avCls: 'av', detail: '', cta: '', launch: () => {} };
+
+    // ---------- terminal rows ----------
+    const termRows = (app && app.kind === 'term' ? inApp(s.section) : []).filter((p) => !q || p.name.toLowerCase().includes(q)).map((p) => ({
+      ...p, ...menuFns(p),
+      initial: initial(p.name), avCls: avCls(p.tint),
+      checked: !!s.checked[p.id], toggle: () => this.setState({ checked: { ...s.checked, [p.id]: !s.checked[p.id] } }),
+      folderShort: p.folder.replace('D:\\Shahid\\Tandem', '…'),
+      act: () => this.launch([p.id]),
+      folderAct: () => { this.setState({ menu: null }); this.flash('Opened the folder for ' + p.name); }
+    }));
+
+    // ---------- groups ----------
+    const groups = GROUPS.map((g) => {
+      const members = g.members.map((id) => this.byId(id)).filter(Boolean);
+      return {
+        name: g.name, sub: g.sub, count: members.length,
+        members: members.map((m) => ({ name: m.name, app: APP_SHORT[m.app], initial: initial(m.name), avCls: avCls(m.tint) })),
+        launch: () => this.launch(members.map((m) => m.id))
+      };
+    });
+
+    // ---------- chat history ----------
+    const hq = s.histQuery.trim().toLowerCase();
+    const chatList = CHATS.filter((c) => (s.histFilter === 'all' || c.app === s.histFilter) && (!hq || (c.title + ' ' + c.snippet).toLowerCase().includes(hq)));
+    const selChat = chatList.find((c) => c.id === s.histSel) || chatList[0];
+    const aiName = (k) => (k === 'claude' || k === 'cc') ? 'Claude' : 'Codex';
+    const chats = chatList.map((c) => {
+      const p = this.byId(c.pid) || { name: '—', tint: 'graphite' };
+      const on = selChat && selChat.id === c.id;
+      return { ...c, profile: p.name, appName: APP_SHORT[c.app], initial: initial(p.name), avCls: avCls(p.tint), cls: 'chat' + (on ? ' on' : ''), selAria: on ? 'true' : 'false', pick: () => this.setState({ histSel: c.id }) };
+    });
+    let chat = null;
+    if (selChat) {
+      const p = this.byId(selChat.pid) || { name: '—' };
+      const term = APPS[selChat.app].kind === 'term';
+      chat = {
+        title: selChat.title,
+        meta: p.name + ' · ' + APP_SHORT[selChat.app] + ' · ' + selChat.when + ' · ' + selChat.n + ' messages · ' + selChat.src,
+        openLabel: term ? 'Resume in terminal' : 'Open ' + p.name,
+        open: () => this.flash(term ? 'Resuming the session in ' + p.name : 'Opening ' + p.name + ' in ' + APP_SHORT[selChat.app]),
+        messages: selChat.messages.map(([who, text]) => ({ who: who === 'you' ? 'You' : aiName(selChat.app), text, color: who === 'you' ? 'var(--muted)' : (aiName(selChat.app) === 'Claude' ? 'var(--claude)' : 'var(--codex)') }))
+      };
+    }
+
+    const seg = (opts, cur, key) => opts.map((o) => ({ label: o, cls: cur === o ? 'on' : '', pick: () => this.setState({ [key]: o }) }));
+
+    // ---------- sheets ----------
+    const t = s.target ? this.byId(s.target) : null;
+    const newErr = this.validName(s.newName, null, s.newApp);
+    const editErr = t ? this.validName(s.editName, t.id, t.app) : '';
+    const swatch = (cur, key, nm) => TINTS.map((c) => ({ cls: 'sw tint-' + c + (cur === c ? ' on' : ''), sel: cur === c ? 'true' : 'false', label: c.charAt(0).toUpperCase() + c.slice(1), initial: initial(nm || 'A'), pick: () => this.setState({ [key]: c }) }));
+    const signinBodies = {
+      claude: 'A fresh Claude window has opened for this profile. Sign in there with the account you want it to use. This window notices as soon as you\u2019re done.',
+      codex: 'A fresh Codex window has opened for this profile. Sign in with the ChatGPT account you want it to use. This window notices as soon as you\u2019re done.',
+      cc: 'A terminal has opened with this profile\u2019s folder. Claude Code will ask you to log in; pick the account for this profile in the browser that opens.',
+      cx: 'A terminal has opened with this profile\u2019s folder. Run codex login there and choose the account for this profile.'
+    };
+    const delMatch = t && s.delTyped.trim() === t.name;
+
+    const minNames = s.lastLaunched.join(', ');
+    const isWin = platform === 'windows';
+
+    return {
+      rootClass: 'mi ' + theme, theme, platform, isMac: !isWin, isWin,
+      winH: this.props.height ?? 800,
+      trayWord: isWin ? 'tray' : 'menu bar',
+      changeShortcut: () => this.flash('Press the new shortcut'),
+      warnOn: s.warn ? 'true' : 'false', warnCls: 'switch' + (s.warn ? ' on' : ''), toggleWarn: () => this.setState({ warn: !s.warn }),
+      keysOn: s.keys ? 'true' : 'false', keysCls: 'switch' + (s.keys ? ' on' : ''), toggleKeys: () => this.setState({ keys: !s.keys }),
+      checkUpdates: () => this.flash('Tandem is up to date'),
+      openSource: () => this.flash('Opening the project on GitHub'),
+      shortcutHint: isWin ? 'Ctrl K' : '\u2318K',
+      query: s.query, onQuery: (e) => this.setState({ query: e.target.value }),
+      refresh: () => this.flash('Usage refreshed for 8 signed-in profiles'),
+      navApps: ['claude', 'codex'].map(navItem), navTerm: ['cc', 'cx'].map(navItem),
+      groupCount: GROUPS.length,
+      navGroupsCls: 'nav' + (s.section === 'groups' ? ' on' : ''), goGroups: go('groups'),
+      navSettingsCls: 'nav' + (s.section === 'settings' ? ' on' : ''), goSettings: go('settings'),
+
+      showDesktop: !!app && app.kind === 'desktop' && s.noApp !== s.section, showTerm: !!app && app.kind === 'term',
+      showNoApp: !!app && s.noApp === s.section, noAppCount: app ? inApp(s.section).length : 0,
+      locateApp: () => this.flash('Choose the ' + (app ? app.title : '') + ' app'),
+      getApp: () => this.flash('Opening the ' + (app ? app.title : '') + ' download page'),
+      usageErr: s.usageErr, usageOk: !s.usageErr,
+      retryUsage: () => { this.setState({ usageErr: false }); this.flash('Usage refreshed'); },
+      showHistory: s.section === 'history',
+      navHistCls: 'nav' + (s.section === 'history' ? ' on' : ''), goHistory: go('history'),
+      histQuery: s.histQuery, onHistQuery: (e) => this.setState({ histQuery: e.target.value }),
+      histFilters: [['all', 'All'], ['claude', 'Claude'], ['codex', 'Codex'], ['cc', 'Claude Code'], ['cx', 'Codex CLI']].map(([k, l]) => ({ label: l, cls: s.histFilter === k ? 'on' : '', pick: () => this.setState({ histFilter: k }) })),
+      histCount: chatList.length + (chatList.length === 1 ? ' chat' : ' chats'),
+      chats, chatsEmpty: chats.length === 0, hasChat: !!chat, chat: chat || { title: '', meta: '', openLabel: '', open: () => {}, messages: [] },
+      copyChat: () => this.flash('Chat copied as text'),
+      importExport: () => this.flash('Choose the zip file from your data export'),
+      howExport: () => this.flash('Claude: Settings › Privacy › Export data. ChatGPT: Settings › Data controls › Export'),
+      welcome: s.welcome, importFD: s.importFD, toggleImport: () => this.setState({ importFD: !s.importFD }),
+      welcomeCta: s.importFD ? 'Bring over 1 profile' : 'Continue',
+      finishWelcome: () => { this.setState({ welcome: false }); this.flash(s.importFD ? 'FD_Work is ready in Tandem' : 'All set'); },
+      startFresh: () => { this.setState({ welcome: false, importFD: false }); this.flash('Starting with just your Main instances'); },
+      foundApps: [
+        { name: 'Claude', version: '1.4.2', status: 'Found', color: 'var(--claude)', statusColor: 'var(--positive)' },
+        { name: 'Codex', version: '0.9.1', status: 'Found', color: 'var(--codex)', statusColor: 'var(--positive)' },
+        { name: 'Claude Code', version: '2.1.8', status: 'Found', color: 'var(--claude)', statusColor: 'var(--positive)' },
+        { name: 'Codex CLI', version: '—', status: 'Not installed', color: 'var(--control)', statusColor: 'var(--muted)' }
+      ],
+      signinFailed: s.signinFailed,
+      retrySignin: () => this.setState({ signinFailed: false, signinDone: false }, () => this.startSignin()),
+      showGroups: s.section === 'groups', showSettings: s.section === 'settings',
+      appTitle: app ? app.title : '', appColor: color[s.section] || 'var(--text)',
+      appSub: !app ? '' : app.kind === 'desktop'
+        ? 'Desktop app ' + app.version + ' · ' + counts.all + ' profiles · ' + counts.running + ' running · the Code tab inside each window uses that profile\u2019s account'
+        : 'Terminal profiles · each one has its own sign-in, history and settings',
+      envVar: app && app.env ? app.env : '', cmd: app && app.cmd ? app.cmd : '',
+      terminals: seg(isWin ? ['Windows Terminal', 'PowerShell'] : ['Terminal', 'iTerm', 'Ghostty'], isWin ? s.terminal : (['Terminal', 'iTerm', 'Ghostty'].includes(s.terminal) ? s.terminal : 'Terminal'), 'terminal'),
+      termNote: s.section === 'cc'
+        ? 'A terminal profile can share an account with a desktop profile, but each keeps its own sign-in. Usage limits are shared per account, so FD_Work here counts against the same 5-hour limit as FD_Work in Claude.'
+        : 'Codex CLI keeps its sign-in in CODEX_HOME, so each profile stays separate. Usage is shared with the desktop profile on the same ChatGPT account.',
+      tabs: [['all', 'All', counts.all], ['running', 'Running', counts.running], ['out', 'Signed out', counts.out]].map(([k, l, c]) => ({ label: l, count: c, cls: 'tab' + (s.tab === k ? ' on' : ''), sel: s.tab === k ? 'true' : 'false', go: () => this.setState({ tab: k }) })),
+      rows, rowsEmpty: rows.length === 0,
+      emptyText: q ? 'No profiles match \u201c' + s.query + '\u201d.' : s.tab === 'running' ? 'Nothing is running. Launch a profile and it shows here.' : 'Every profile here is signed in.',
+      best,
+      launchDisabled: checkedIds.length === 0,
+      launchLabel: checkedIds.length > 1 ? 'Launch ' + checkedIds.length + ' profiles' : checkedIds.length === 1 ? 'Launch 1 profile' : 'Select profiles to launch',
+      onSheetKey: (e) => { if (e.key === 'Escape') { clearTimeout(this._s); this.setState({ sheet: null }); } },
+      onMenuKey: (e) => { if (e.key === 'Escape') this.setState({ menu: null }); },
+      launchSelected: () => checkedIds.length && this.launch(checkedIds),
+      termRows,
+      groups, newGroup: () => this.flash('Pick profiles, then choose Add to group'),
+
+      afterOpts: [['minimize', 'Minimize to tray'], ['keep', 'Stay open'], ['quit', 'Quit']].map(([k, l]) => ({ label: l, cls: s.after === k ? 'on' : '', pick: () => this.setState({ after: k }) })),
+      appearOpts: [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']].map(([k, l]) => ({ label: l, cls: s.appearance === k ? 'on' : '', pick: () => this.setState({ appearance: k }) })),
+      refreshOpts: seg(['1 min', '5 min', '15 min', 'Manual'], s.refresh, 'refresh'),
+      trayLabel: isWin ? 'Show in the system tray' : 'Show in the menu bar',
+      trayOn: s.tray ? 'true' : 'false', trayCls: 'switch' + (s.tray ? ' on' : ''), toggleTray: () => this.setState({ tray: !s.tray }),
+      loginOn: s.login ? 'true' : 'false', loginCls: 'switch' + (s.login ? ' on' : ''), toggleLogin: () => this.setState({ login: !s.login }),
+      globalShortcut: isWin ? 'Ctrl + Shift + Space' : '\u2325 \u2318 Space',
+      claudePath: isWin ? 'WindowsApps\\Claude_pzs8sxrjxfjjc' : '/Applications/Claude.app',
+      codexPath: isWin ? 'WindowsApps\\OpenAI.Codex_2p2nqsd0c76g0' : '/Applications/Codex.app',
+      profilesPath: isWin ? 'D:\\Shahid\\Tandem\\Profiles' : '~/Library/Application Support/Tandem',
+      showFolder: () => this.flash('Opened the profiles folder'),
+
+      hasToast: !!s.toast, toast: s.toast,
+      menuOpenAny: !!s.menu, closeMenu: () => this.setState({ menu: null }),
+
+      sheetOpen: !!s.sheet, closeSheet: () => { clearTimeout(this._s); this.setState({ sheet: null, signinFailed: false }); },
+      sheetNew: s.sheet === 'new', sheetSignin: s.sheet === 'signin', sheetEdit: s.sheet === 'edit', sheetDelete: s.sheet === 'delete',
+      openNew: () => this.setState({ sheet: 'new', newApp: app ? s.section : 'claude', newName: '', newTint: 'teal', newSignin: true, menu: null }),
+      newAppOpts: ['claude', 'codex', 'cc', 'cx'].map((k) => ({ label: APP_SHORT[k], cls: s.newApp === k ? 'on' : '', pick: () => this.setState({ newApp: k }) })),
+      newName: s.newName, onNewName: (e) => this.setState({ newName: e.target.value }), newError: newErr,
+      swatches: swatch(s.newTint, 'newTint', s.newName),
+      newSignin: s.newSignin ? 'true' : 'false', newSigninCls: 'switch' + (s.newSignin ? ' on' : ''), toggleNewSignin: () => this.setState({ newSignin: !s.newSignin }),
+      signinHint: APPS[s.newApp].kind === 'term' ? 'Opens a terminal and starts the login' : 'Opens a fresh ' + APPS[s.newApp].title + ' window to sign in',
+      createDisabled: !s.newName.trim() || !!newErr,
+      createProfile: () => {
+        const id = 'n' + Date.now();
+        const isTerm = APPS[s.newApp].kind === 'term';
+        const p = isTerm
+          ? { id, app: s.newApp, name: s.newName.trim(), email: 'Not signed in yet', tint: s.newTint, folder: 'D:\\Shahid\\Tandem\\' + (s.newApp === 'cc' ? 'ClaudeCodeProfiles' : 'CodexCliProfiles') + '\\' + s.newName.trim(), last: 'Never' }
+          : { id, app: s.newApp, name: s.newName.trim(), email: 'Not signed in', plan: '—', tint: s.newTint, signedIn: false, running: false };
+        this.setState({ profiles: [...s.profiles, p], section: s.newApp, tab: 'all', target: id, sheet: s.newSignin ? 'signin' : null, signinDone: false }, () => s.newSignin ? this.startSignin() : this.flash('Created ' + p.name));
+      },
+
+      signinApp: t ? APPS[t.app].title : '', signinName: t ? t.name : '', signinInitial: t ? initial(t.name) : '', signinAvCls: t ? avCls(t.tint) : 'av',
+      signinBody: t ? signinBodies[t.app] : '',
+      signinWaiting: !s.signinDone && !s.signinFailed, signinDone: s.signinDone && !s.signinFailed,
+      launchSignedIn: () => t && this.launch([t.id]),
+
+      editName: s.editName, onEditName: (e) => this.setState({ editName: e.target.value }), editError: editErr,
+      editSwatches: swatch(s.editTint, 'editTint', s.editName),
+      editNote: t && t.running ? 'Renaming takes effect the next time ' + t.name + ' opens.' : 'Desktop shortcuts are updated to the new name.',
+      saveDisabled: !s.editName.trim() || !!editErr,
+      saveEdit: () => { this.setP(t.id, { name: s.editName.trim(), tint: s.editTint }); this.setState({ sheet: null }); this.flash('Saved ' + s.editName.trim()); },
+
+      delName: t ? t.name : '', delRunning: !!(t && t.running), delTyped: s.delTyped,
+      onDelTyped: (e) => this.setState({ delTyped: e.target.value }),
+      delDisabled: !delMatch, delLabel: t && t.running ? 'Close and delete' : 'Delete profile',
+      confirmDelete: () => { const n = t.name; this.setState({ profiles: s.profiles.filter((p) => p.id !== t.id), sheet: null, target: null }); this.flash('Deleted ' + n); },
+
+      minimized: s.minimized,
+      minTitle: 'Launched ' + (s.lastLaunched.length > 2 ? s.lastLaunched.length + ' profiles' : minNames),
+      minBody: 'Tandem tucked itself into the ' + (isWin ? 'system tray' : 'menu bar') + '. Open it from there any time, or change this in Settings.',
+      restore: () => this.setState({ minimized: false })
+    };
+  }
+  startSignin() {
+    clearTimeout(this._s);
+    this._s = setTimeout(() => {
+      const t = this.state.target;
+      if (!t || this.state.sheet !== 'signin') return;
+      const p = this.byId(t);
+      const patch = APPS[p.app].kind === 'term' ? { email: 'new@example.com · Pro', last: 'Just now' } : { signedIn: true, email: 'new@example.com', plan: 'Pro', u5: 0, r5: '—', u7: 0, r7: '—' };
+      this.setState({ signinDone: true, profiles: this.state.profiles.map((x) => x.id === t ? { ...x, ...patch } : x) });
+    }, 2600);
+  }
+}
+</script>
+</body>
+</html>

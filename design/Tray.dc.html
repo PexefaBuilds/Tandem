@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tandem — tray</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.tray.light{
+  --ground:#f6f7f8;--surface:#ffffff;--raised:#f3f4f6;--active:#e9ebed;--border:#e6e8ea;--rule:#eff0f2;--control:#cbcdd1;
+  --text:#131416;--muted:#5b5e62;--faint:#66696e;--focus:#0a5dc2;
+  --primary-bg:#131416;--primary-ink:#ffffff;
+  --claude:#b4532c;--codex:#2160c4;
+  --positive:#1e7b4f;--negative:#c4242a;
+  --tint-graphite-bg:#e9ebed;--tint-graphite-ink:#353736;
+  --tint-blue-bg:#e2ecfb;--tint-blue-ink:#1d4c8c;
+  --tint-green-bg:#dff2e7;--tint-green-ink:#1d6840;
+  --tint-amber-bg:#f9eed6;--tint-amber-ink:#744a05;
+  --tint-rose-bg:#fae3e8;--tint-rose-ink:#8c2241;
+  --tint-teal-bg:#dcf1ef;--tint-teal-ink:#145f5a;
+  --t-shadow:0 18px 48px rgba(19,20,22,.16),0 2px 8px rgba(19,20,22,.06);
+}
+.tray.dark{
+  --ground:#161719;--surface:#1d1f21;--raised:#232528;--active:#2c2f32;--border:#2d3033;--rule:#26282b;--control:#4a4d52;
+  --text:#ececee;--muted:#a3a6ab;--faint:#94989d;--focus:#8ab4ff;
+  --primary-bg:#ececee;--primary-ink:#131416;
+  --claude:#e38c64;--codex:#76a5f2;
+  --positive:#5cc28b;--negative:#f2726f;
+  --tint-graphite-bg:#33363a;--tint-graphite-ink:#dcdee1;
+  --tint-blue-bg:#1f3350;--tint-blue-ink:#b7d0f6;
+  --tint-green-bg:#1c3a2a;--tint-green-ink:#a9dfbf;
+  --tint-amber-bg:#3f3218;--tint-amber-ink:#efd29a;
+  --tint-rose-bg:#45212b;--tint-rose-ink:#f4bccb;
+  --tint-teal-bg:#173a38;--tint-teal-ink:#a3dcd6;
+  --t-shadow:0 18px 48px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.3);
+}
+.tray{width:360px;height:600px;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);border:1px solid var(--border);box-shadow:var(--t-shadow);font-family:"Instrument Sans",system-ui,sans-serif;color:var(--text);font-size:13px;-webkit-font-smoothing:antialiased}
+.tray.win{border-radius:8px}
+.tray.mac{border-radius:12px}
+.tray *{box-sizing:border-box}
+.tray button,.tray input{font-family:inherit;color:inherit}
+.tray .t-num{font-variant-numeric:tabular-nums}
+.tray .t-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding:0 8px 8px 8px}
+.tray .t-label{display:flex;align-items:center;gap:8px;height:28px;padding:8px 8px 0 8px;font-size:12px;color:var(--muted)}
+.tray .t-dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.tray .t-run{width:6px;height:6px;border-radius:50%;background:var(--positive);display:inline-block}
+.tray .t-row{display:grid;grid-template-columns:24px minmax(0,1fr) auto 6px;column-gap:10px;align-items:center;width:100%;height:36px;padding:0 8px;border:0;border-radius:6px;background:transparent;font-size:13px;text-align:left;cursor:pointer}
+.tray .t-row:hover,.tray .t-row:focus-visible{background:var(--raised)}
+.tray .t-row:focus-visible,.tray .t-btn:focus-visible,.tray .t-pill:focus-visible,.tray .t-field:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.tray .t-av{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex:none}
+.tray .t-tint-graphite{background:var(--tint-graphite-bg);color:var(--tint-graphite-ink)}
+.tray .t-tint-blue{background:var(--tint-blue-bg);color:var(--tint-blue-ink)}
+.tray .t-tint-green{background:var(--tint-green-bg);color:var(--tint-green-ink)}
+.tray .t-tint-amber{background:var(--tint-amber-bg);color:var(--tint-amber-ink)}
+.tray .t-tint-rose{background:var(--tint-rose-bg);color:var(--tint-rose-ink)}
+.tray .t-tint-teal{background:var(--tint-teal-bg);color:var(--tint-teal-ink)}
+.tray .t-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tray .t-trail{display:grid;justify-items:end;align-items:center;white-space:nowrap}
+.tray .t-trail > span{grid-area:1/1}
+.tray .t-meta{font-size:12px;color:var(--muted);transition:opacity .12s ease}
+.tray .t-act{font-size:12px;font-weight:500;color:var(--text);opacity:0;transition:opacity .12s ease}
+.tray .t-row:hover .t-meta,.tray .t-row:focus-visible .t-meta{opacity:0}
+.tray .t-row:hover .t-act,.tray .t-row:focus-visible .t-act{opacity:1}
+.tray .t-group{display:grid;grid-template-columns:24px minmax(0,1fr) auto;column-gap:10px;align-items:center;height:40px;padding:0 8px;border-radius:6px}
+.tray .t-pill{height:28px;padding:0 12px;border-radius:999px;border:1px solid var(--primary-bg);background:var(--primary-bg);color:var(--primary-ink);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap}
+.tray .t-pill:hover{opacity:.88}
+.tray .t-pill:active{transform:scale(.98)}
+.tray .t-field{height:32px;width:100%;padding:0 12px 0 32px;border-radius:8px;border:1px solid var(--border);background:var(--raised);font-size:13px;outline:none}
+.tray .t-field::placeholder{color:var(--faint)}
+.tray .t-field:focus{background:var(--surface);border-color:var(--control)}
+.tray .t-foot{flex:none;display:flex;align-items:center;gap:2px;height:48px;padding:0 6px;border-top:1px solid var(--rule)}
+.tray .t-btn{height:32px;padding:0 10px;border:0;border-radius:6px;background:transparent;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tray .t-btn:hover{background:var(--raised);color:var(--text)}
+.tray .t-btn.t-strong{color:var(--text);font-weight:500}
+.tray .t-note{flex:none;display:flex;align-items:center;gap:8px;height:32px;padding:0 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--rule)}
+@keyframes t-rise{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tray .t-rise{animation:t-rise .16s ease-out}
+@media (prefers-reduced-motion: reduce){.tray .t-rise{animation:none}.tray .t-meta,.tray .t-act{transition:none}}
+</style>
+</helmet>
+
+<div class="{{rootClass}}" role="dialog" aria-label="Tandem quick launch">
+
+  <!-- header -->
+  <div style="flex: none; height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 16px;">
+    <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+      <rect x="7" y="4" width="15" height="32" rx="7.5" fill="var(--claude)"></rect>
+      <rect x="26" y="12" width="15" height="32" rx="7.5" fill="var(--codex)"></rect>
+    </svg>
+    <span style="font-size: 14px; font-weight: 600; letter-spacing: -0.01em; flex-grow: 1;">Tandem</span>
+    <span class="t-num" style="font-size: 12px; color: var(--muted);">{{signedInLabel}}</span>
+  </div>
+
+  <!-- search -->
+  <div style="flex: none; padding: 0 16px 8px 16px; position: relative; display: flex; align-items: center;">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" style="position: absolute; left: 28px; color: var(--faint);" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3" stroke-linecap="round"></path></svg>
+    <label for="t-search" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Launch a profile</label>
+    <input id="t-search" class="t-field" style="padding-right: 112px;" placeholder="Launch a profile…" value="{{query}}" onChange="{{onQuery}}" autocomplete="off">
+    <span style="position: absolute; right: 28px; font-size: 11px; color: var(--faint); white-space: nowrap;">{{shortcutHint}}</span>
+  </div>
+
+  <div class="t-scroll">
+
+    <!-- Claude -->
+    <sc-if value="{{hasClaude}}" hint-placeholder-val="{{ true }}">
+      <div class="t-label"><span class="t-dot" style="background: var(--claude);"></span>Claude</div>
+      <sc-for list="{{claudeRows}}" as="r" hint-placeholder-count="4">
+        <button class="t-row" onClick="{{r.go}}" aria-label="{{r.aria}}">
+          <span class="{{r.avCls}}">{{r.initial}}</span>
+          <span class="t-name">{{r.name}}</span>
+          <span class="t-trail">
+            <span class="t-meta t-num"><span style="color: {{r.uColor}};">{{r.u5}}%</span> · 5h</span>
+            <span class="t-act">{{r.actLabel}}</span>
+          </span>
+          <span style="display: inline-flex; width: 6px; justify-content: center;"><sc-if value="{{r.running}}" hint-placeholder-val="{{ true }}"><span class="t-run" title="Running"></span></sc-if></span>
+        </button>
+      </sc-for>
+    </sc-if>
+
+    <!-- Codex -->
+    <sc-if value="{{hasCodex}}" hint-placeholder-val="{{ true }}">
+      <div class="t-label"><span class="t-dot" style="background: var(--codex);"></span>Codex</div>
+      <sc-for list="{{codexRows}}" as="r" hint-placeholder-count="3">
+        <button class="t-row" onClick="{{r.go}}" aria-label="{{r.aria}}">
+          <span class="{{r.avCls}}">{{r.initial}}</span>
+          <span class="t-name">{{r.name}}</span>
+          <span class="t-trail">
+            <span class="t-meta t-num"><span style="color: {{r.uColor}};">{{r.u5}}%</span> · 5h</span>
+            <span class="t-act">{{r.actLabel}}</span>
+          </span>
+          <span style="display: inline-flex; width: 6px; justify-content: center;"><sc-if value="{{r.running}}" hint-placeholder-val="{{ false }}"><span class="t-run" title="Running"></span></sc-if></span>
+        </button>
+      </sc-for>
+    </sc-if>
+
+    <!-- Terminal -->
+    <sc-if value="{{hasTerm}}" hint-placeholder-val="{{ true }}">
+      <div class="t-label">Terminal</div>
+      <sc-for list="{{termRows}}" as="r" hint-placeholder-count="2">
+        <button class="t-row" onClick="{{r.go}}" aria-label="{{r.aria}}">
+          <span class="{{r.avCls}}">{{r.initial}}</span>
+          <span class="t-name"><span style="color: var(--muted); font-weight: 400;">{{r.tool}} · </span>{{r.name}}</span>
+          <span class="t-trail">
+            <span class="t-meta">{{r.last}}</span>
+            <span class="t-act">Open terminal</span>
+          </span>
+          <span></span>
+        </button>
+      </sc-for>
+    </sc-if>
+
+    <!-- Groups -->
+    <sc-if value="{{hasGroups}}" hint-placeholder-val="{{ true }}">
+      <div class="t-label">Groups</div>
+      <sc-for list="{{groupRows}}" as="g" hint-placeholder-count="1">
+        <div class="t-group">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--muted); margin-left: 4px;" aria-hidden="true"><rect x="2" y="2" width="5" height="5" rx="1.5"></rect><rect x="9" y="2" width="5" height="5" rx="1.5"></rect><rect x="2" y="9" width="5" height="5" rx="1.5"></rect><rect x="9" y="9" width="5" height="5" rx="1.5"></rect></svg>
+          <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><span style="font-weight: 500;">{{g.name}}</span><span class="t-num" style="color: var(--muted);"> — {{g.count}} profiles</span></span>
+          <button class="t-pill" onClick="{{g.go}}" aria-label="{{g.aria}}">Launch all</button>
+        </div>
+      </sc-for>
+    </sc-if>
+
+    <sc-if value="{{empty}}" hint-placeholder-val="{{ false }}">
+      <div style="padding: 32px 8px; text-align: center; font-size: 13px; color: var(--muted);">{{emptyText}}</div>
+    </sc-if>
+  </div>
+
+  <!-- confirmation -->
+  <sc-if value="{{hasNote}}" hint-placeholder-val="{{ false }}">
+    <div class="t-note t-rise" role="status">
+      <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="var(--positive)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7.5 2.5 2.5L11 4.5"></path></svg>
+      <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{note}}</span>
+    </div>
+  </sc-if>
+
+  <!-- footer -->
+  <div class="t-foot">
+    <sc-if value="{{isWin}}" hint-placeholder-val="{{ true }}">
+      <button class="t-btn t-strong" onClick="{{open}}">Open Tandem</button>
+      <span style="flex-grow: 1;"></span>
+      <button class="t-btn" onClick="{{settings}}">Settings</button>
+      <button class="t-btn" onClick="{{quit}}">Quit</button>
+    </sc-if>
+    <sc-if value="{{isMac}}" hint-placeholder-val="{{ false }}">
+      <button class="t-btn" onClick="{{settings}}">Settings</button>
+      <button class="t-btn" onClick="{{quit}}">Quit</button>
+      <span style="flex-grow: 1;"></span>
+      <button class="t-btn t-strong" onClick="{{open}}">Open Tandem</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"platform":{"editor":"enum","options":["windows","mac"],"default":"windows"},"onOpen":{"editor":null},"$preview":{"width":360,"height":600}}'>
+const SEED = [
+  { id: 'c0', app: 'claude', name: 'Main instance', tint: 'graphite', running: true,  u5: 22 },
+  { id: 'c1', app: 'claude', name: 'FD_Work',       tint: 'blue',     running: true,  u5: 71 },
+  { id: 'c2', app: 'claude', name: 'Personal',      tint: 'green',    running: false, u5: 6 },
+  { id: 'c3', app: 'claude', name: 'Freelance',     tint: 'amber',    running: false, u5: 92 },
+  { id: 'x0', app: 'codex',  name: 'Main instance', tint: 'graphite', running: false, u5: 35 },
+  { id: 'x1', app: 'codex',  name: 'Work',          tint: 'blue',     running: true,  u5: 64 },
+  { id: 'x2', app: 'codex',  name: 'Personal',      tint: 'green',    running: false, u5: 0 }
+];
+const TERMS = [
+  { id: 't1', tool: 'Claude Code', name: 'FD_Work', tint: 'blue', last: 'Today' },
+  { id: 't3', tool: 'Codex CLI',   name: 'Work',    tint: 'blue', last: 'Mon' }
+];
+const GROUPS = [
+  { id: 'g1', name: 'Work trio', members: ['c1', 'x1', 't1'] }
+];
+const APP_TITLE = { claude: 'Claude', codex: 'Codex' };
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { profiles: SEED.map((p) => ({ ...p })), query: '', note: '' };
+  }
+  componentWillUnmount() { clearTimeout(this._t); }
+  say(msg) {
+    clearTimeout(this._t);
+    this.setState({ note: msg });
+    this._t = setTimeout(() => this.setState({ note: '' }), 2800);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const theme = this.props.theme ?? 'light';
+    const platform = this.props.platform ?? 'windows';
+    const isMac = platform === 'mac';
+    const q = s.query.trim().toLowerCase();
+    const initial = (n) => n === 'Main instance' ? 'M' : n.replace(/[^A-Za-z0-9]/g, '').slice(0, 1).toUpperCase();
+    const match = (text) => !q || text.toLowerCase().includes(q);
+
+    const profileRow = (p) => ({
+      name: p.name,
+      initial: initial(p.name),
+      avCls: 't-av t-tint-' + p.tint,
+      u5: p.u5,
+      uColor: p.u5 >= 85 ? 'var(--negative)' : 'var(--muted)',
+      running: !!p.running,
+      actLabel: p.running ? 'Open' : 'Launch',
+      aria: (p.running ? 'Open ' : 'Launch ') + APP_TITLE[p.app] + ' ' + p.name + ', ' + p.u5 + ' percent of 5-hour limit used' + (p.running ? ', running' : ''),
+      go: () => {
+        if (p.running) return this.say('Switched to ' + p.name + ' in ' + APP_TITLE[p.app]);
+        this.setState({ profiles: s.profiles.map((x) => x.id === p.id ? { ...x, running: true } : x) });
+        this.say('Launched ' + p.name + ' — opening…');
+      }
+    });
+
+    const forApp = (app) => s.profiles.filter((p) => p.app === app && match(p.name + ' ' + APP_TITLE[app])).map(profileRow);
+    const claudeRows = forApp('claude');
+    const codexRows = forApp('codex');
+
+    const termRows = TERMS.filter((t) => match(t.tool + ' ' + t.name + ' terminal')).map((t) => ({
+      ...t,
+      initial: initial(t.name),
+      avCls: 't-av t-tint-' + t.tint,
+      aria: 'Open terminal for ' + t.tool + ' ' + t.name,
+      go: () => this.say('Opened a terminal for ' + t.tool + ' · ' + t.name)
+    }));
+
+    const groupRows = GROUPS.filter((g) => match(g.name + ' group')).map((g) => ({
+      name: g.name,
+      count: g.members.length,
+      aria: 'Launch all ' + g.members.length + ' profiles in ' + g.name,
+      go: () => {
+        this.setState({ profiles: s.profiles.map((x) => g.members.includes(x.id) ? { ...x, running: true } : x) });
+        this.say('Launched ' + g.name + ' — opening ' + g.members.length + ' profiles…');
+      }
+    }));
+
+    const total = claudeRows.length + codexRows.length + termRows.length + groupRows.length;
+    const onOpen = this.props.onOpen;
+
+    return {
+      rootClass: 'tray ' + (theme === 'dark' ? 'dark' : 'light') + ' ' + (isMac ? 'mac' : 'win'),
+      isMac, isWin: !isMac,
+      signedInLabel: '8 signed in',
+      shortcutHint: isMac ? '⌥⌘Space' : 'Ctrl Shift Space',
+      query: s.query,
+      onQuery: (e) => this.setState({ query: e.target.value }),
+      claudeRows, codexRows, termRows, groupRows,
+      hasClaude: claudeRows.length > 0,
+      hasCodex: codexRows.length > 0,
+      hasTerm: termRows.length > 0,
+      hasGroups: groupRows.length > 0,
+      empty: total === 0,
+      emptyText: 'No profile or group matches “' + s.query.trim() + '”',
+      hasNote: !!s.note,
+      note: s.note,
+      open: () => { if (typeof onOpen === 'function') onOpen(); },
+      settings: () => { if (typeof onOpen === 'function') onOpen(); },
+      quit: () => this.say('Tandem will quit. Running apps stay open.')
+    };
+  }
+}
+</script>
+</body>
+</html>
