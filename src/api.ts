@@ -11,7 +11,7 @@ export interface SignInStatus { phase: "idle" | "waiting" | "detected" | "ready"
 export interface Settings { afterLaunch: AfterLaunch; welcomeDone: boolean; refreshMinutes: number; warnNearLimit: boolean; showTray: boolean; openAtLogin: boolean; terminal: "wt" | "powershell" | "iterm" | "ghostty"; keepSeparate: boolean }
 export interface UsageRow { label: string; pct: number; resetsAt: string }
 /** kind: "" (fresh) | "expired" | "locked" | "offline" | "limited" | "blocked" | "other". Old rows are kept on failure. */
-export interface UpdateInfo { current: string; latest: string; url: string; newer: boolean }
+export interface UpdateInfo { current: string; latest: string; newer: boolean }
 export interface Usage { app: AppKey; name: string; kind: string; message: string; account: string; plan: string; rows: UsageRow[]; updated: number }
 export interface Found { path: string; name: string; app: AppKey; hasSignIn: boolean; inUse: boolean; isDefault: boolean }
 export interface Schedule { app: AppKey; name: string; enabled: boolean; time: string; repeat: string; message: string; route: string; terminal: string; lastSent: number; lastStatus: string; lastNote: string; lastDay: string }
@@ -43,6 +43,7 @@ export const api = {
   usageSnapshot: () => invoke<Usage[]>("usage_snapshot"),
   refreshUsage: () => invoke<Usage[]>("refresh_usage"),
   checkUpdate: () => invoke<UpdateInfo>("check_update"),
+  installUpdate: () => invoke<void>("install_update"),
   quit: () => invoke<void>("quit"),
   groups: () => invoke<Group[]>("get_groups"),
   saveGroup: (old: string | null, name: string, members: Member[]) => invoke<void>("save_group", { old, name, members }),

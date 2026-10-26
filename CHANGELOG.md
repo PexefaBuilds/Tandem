@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.0
+- New: "Update now" in Settings downloads the new version, checks its signature, installs it over the current copy (no uninstall) and restarts Tandem. Windows and macOS. Installs older than 1.2.0 need one manual install of this version first.
+
 ## 1.1.0
 - New: scheduled session start can now send through Claude Code (`claude -p`) using a signed-in Claude Code profile. It is the default when available, and the web route (beta) stays as the other choice. The Claude Code option is greyed out, with the reason, when the CLI is missing or no profile is signed in.
 

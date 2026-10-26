@@ -2,7 +2,6 @@ import { api, errText, type AfterLaunch, type State } from "./api";
 import { applyTheme, savedTheme, type Theme } from "./theme";
 import { useState } from "react";
 import { terminalChoices } from "./platform";
-import { openUrl } from "@tauri-apps/plugin-opener";
 
 function Seg<T extends string>({ value, options, onChange, label }: { value: T; options: [T, string][]; onChange: (v: T) => void; label: string }) {
   return (
@@ -22,14 +21,19 @@ const Row = ({ title, hint, children }: { title: string; hint?: string; children
 export function Settings({ state, reload, toast }: { state: State; reload: () => void; toast: (m: string) => void }) {
   const [theme, setTheme] = useState<Theme>(savedTheme());
   const setAfter = (afterLaunch: AfterLaunch) => api.setSettings({ ...state.settings, afterLaunch }).then(reload).catch((e) => toast(errText(e)));
-  const [upd, setUpd] = useState<{ text: string; url?: string } | null>(null);
+  const [upd, setUpd] = useState<{ text: string; newer?: boolean } | null>(null);
+  const [installing, setInstalling] = useState(false);
   const [checking, setChecking] = useState(false);
   const checkUpdate = () => {
     setChecking(true);
     api.checkUpdate()
-      .then((u) => setUpd(u.newer ? { text: `Version ${u.latest.replace(/^v/, "")} is available.`, url: u.url } : { text: `You're up to date (${u.current}).` }))
+      .then((u) => setUpd(u.newer ? { text: `Version ${u.latest} is available.`, newer: true } : { text: `You're up to date (${u.current}).` }))
       .catch((e) => setUpd({ text: errText(e) }))
       .finally(() => setChecking(false));
+  };
+  const install = () => {
+    setInstalling(true);
+    api.installUpdate().catch((e) => { setUpd({ text: errText(e), newer: true }); setInstalling(false); });
   };
   const save = (patch: Partial<State["settings"]>) => api.setSettings({ ...state.settings, ...patch }).then(reload).catch((e) => toast(errText(e)));
   return (
@@ -82,7 +86,7 @@ export function Settings({ state, reload, toast }: { state: State; reload: () =>
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <button className="btn" disabled={checking} onClick={checkUpdate}>{checking ? "Checking…" : "Check for updates"}</button>
           {upd && <span role="status" style={{ fontSize: 13, color: "var(--muted)" }}>{upd.text}</span>}
-          {upd?.url && <button className="btn primary" onClick={() => openUrl(upd.url!).catch((e) => toast(errText(e)))}>Download</button>}
+          {upd?.newer && <button className="btn primary" disabled={installing} onClick={install}>{installing ? "Updating…" : "Update now"}</button>}
         </div>
       </Row>
     </div>

@@ -2,5 +2,5 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "windows": ["main", "tray"],
-  "permissions": ["core:default", "core:window:allow-minimize", "core:window:allow-toggle-maximize", "core:window:allow-close", "core:window:allow-start-dragging", { "identifier": "opener:allow-open-url", "allow": [{ "url": "https://github.com/PexefaBuilds/Tandem/**" }] }, "dialog:allow-open", "core:window:allow-set-icon", "notification:default"]
+  "permissions": ["core:default", "updater:default", "core:window:allow-minimize", "core:window:allow-toggle-maximize", "core:window:allow-close", "core:window:allow-start-dragging", { "identifier": "opener:allow-open-url", "allow": [{ "url": "https://github.com/PexefaBuilds/Tandem/**" }] }, "dialog:allow-open", "core:window:allow-set-icon", "notification:default"]
 }

@@ -8,6 +8,7 @@ mod signin;
 mod store;
 mod terminal;
 mod tray;
+mod updater;
 mod usage;
 
 use engine::{app_by_key, App};
@@ -622,43 +623,6 @@ fn quit(handle: tauri::AppHandle) {
     handle.exit(0);
 }
 
-/// GitHub "owner/name" whose latest release "Check for updates" reads. Empty until the repo is published.
-const UPDATE_REPO: &str = "PexefaBuilds/Tandem";
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct UpdateInfo {
-    current: &'static str,
-    latest: String,
-    url: String,
-    newer: bool,
-}
-
-fn version_parts(v: &str) -> Vec<u32> {
-    v.trim_start_matches('v').split('.').map(|p| p.chars().take_while(char::is_ascii_digit).collect::<String>().parse().unwrap_or(0)).collect()
-}
-
-#[tauri::command]
-async fn check_update() -> Res<UpdateInfo> {
-    if UPDATE_REPO.is_empty() {
-        return Err("No release page yet. Updates will appear here once Tandem is published.".into());
-    }
-    let resp = reqwest::Client::new()
-        .get(format!("https://api.github.com/repos/{UPDATE_REPO}/releases/latest"))
-        .header("User-Agent", "Tandem")
-        .timeout(std::time::Duration::from_secs(15))
-        .send()
-        .await
-        .map_err(|_| "Couldn't reach GitHub. Check your connection.")?;
-    if resp.status().as_u16() == 404 {
-        return Err("No release has been published yet.".into());
-    }
-    let j: serde_json::Value = resp.error_for_status().map_err(|e| format!("GitHub said {}.", e.status().map_or(0, |s| s.as_u16())))?.json().await.map_err(|_| "Unexpected reply from GitHub.")?;
-    let latest = j["tag_name"].as_str().unwrap_or("").to_string();
-    let current = env!("CARGO_PKG_VERSION");
-    Ok(UpdateInfo { current, newer: version_parts(&latest) > version_parts(current), latest, url: j["html_url"].as_str().unwrap_or("").into() })
-}
-
 pub fn run() {
     use tauri::{Manager, WindowEvent};
     use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
@@ -670,6 +634,8 @@ pub fn run() {
             }
         }))
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(updater::Pending::default())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, Some(vec!["--hidden"])))
@@ -724,7 +690,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_state, create_profile, update_profile, delete_profile, launch, close, show_folder, set_settings, check_name, scan_folder, scan_computer, recheck_in_use, import_profile, signin_start, signin_status, signin_cancel,
-            signin_orphan, signin_recover, usage_snapshot, refresh_usage, check_update, quit, get_groups, save_group, delete_group, add_to_group, launch_group, set_shortcut, hide_main, open_main, hide_flyout, set_tray_icon, save_schedule, send_session_now, terminal_signin, history_refresh, history_status, history_list, history_session, history_import, history_coverage, history_resume
+            signin_orphan, signin_recover, usage_snapshot, refresh_usage, updater::check_update, updater::install_update, quit, get_groups, save_group, delete_group, add_to_group, launch_group, set_shortcut, hide_main, open_main, hide_flyout, set_tray_icon, save_schedule, send_session_now, terminal_signin, history_refresh, history_status, history_list, history_session, history_import, history_coverage, history_resume
         ])
         .build(tauri::generate_context!())
         .expect("error while building Tandem")
