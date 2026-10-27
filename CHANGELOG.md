@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2
+- Fix: a usage meter at 100% now says "limit reached" instead of "near limit".
+- Fix: a meter whose caption wraps to two lines no longer sits out of line with the other bars.
+
 ## 1.2.1
 - Fix: the Session start window is wider, so everything fits at the default window size.
 - Fix: the sidebar showed a fixed "0.1" under the logo. It now shows the real version.

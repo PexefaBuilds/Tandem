@@ -228,10 +228,10 @@ export function Profiles({ app, profiles, usage, retry, query, ctx, dataDir }: {
                 <span style={{ fontSize: 13, fontWeight: 500 }}>Session expired</span>
                 <span style={{ fontSize: 12, color: "var(--muted)" }}>Usage unknown</span>
               </div>
-            ) : noFigures ? <span style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.4 }}>{u?.message || "Loading…"}</span> : <Meter r={u5} short="5-hour" />}
+            ) : noFigures ? <span style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.4 }}>{u?.message || "Loading…"}</span> : <div style={{ alignSelf: "start", marginTop: 12 }}><Meter r={u5} short="5-hour" /></div>}
             {r.signedOut ? <span style={{ color: "var(--faint)" }}>—</span> : expired ? (
               <span style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.4 }}>Open it once to sign back in and refresh</span>
-            ) : noFigures ? <span /> : <Meter r={u7} short="weekly" />}
+            ) : noFigures ? <span /> : <div style={{ alignSelf: "start", marginTop: 12 }}><Meter r={u7} short="weekly" /></div>}
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               {r.running
                 ? <button className="btn" style={{ minWidth: 88, justifyContent: "center" }} onClick={() => closeRow(r)}>Close</button>
