@@ -45,7 +45,7 @@ Tandem is an open-source desktop app for Windows and macOS that runs several Cla
 ```
 src/              React UI (screens follow design/*.dc.html)
 src/styles/       tokens.css, components.css
-src-tauri/        Rust: engine (profiles, launch, processes), usage, history, schedule, terminal, tray, shortcut (flat files; M7 adds macOS code in a new platform/macos folder)
+src-tauri/        Rust: engine (profiles, launch, processes), usage, history, schedule, terminal, tray, shortcut (flat files; macOS code is in `platform/macos.rs` and `cfg(target_os = "macos")` branches)
 design/           design canvas source files (reference only; not shipped)
 docs/             SPEC, BUILD-PLAN, DESIGN, EXISTING-APP, OPEN-SOURCE
 ```
