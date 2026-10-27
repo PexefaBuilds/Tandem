@@ -52,4 +52,4 @@ docs/             SPEC, BUILD-PLAN, DESIGN, EXISTING-APP, OPEN-SOURCE
 
 ## Current state
 
-Read `WORK_PLAN.md` first. M0 to M8 are built and v1.0.2 is released on GitHub (public repo `PexefaBuilds/Tandem`). macOS is untested on a real Mac; the signed updater and screenshots wait on the owner. All commits and pushes must be by PexefaBuilds (see WORK_PLAN gotchas). Mac builds run over `ssh mac`, releases follow "How to release" in `WORK_PLAN.md`. Never print or commit secrets; test against `.devdata` via `TANDEM_DATA_DIR`.
+Read `WORK_PLAN.md` first. M0 to M8 are built and v1.2.2 is released on GitHub with a signed in-app updater ("Update now") (public repo `PexefaBuilds/Tandem`). macOS is untested on a real Mac; screenshots and code signing wait on the owner; the updater key lives in `~/.tauri/tandem-updater.key` (never print or commit). All commits and pushes must be by PexefaBuilds (see WORK_PLAN gotchas). Mac builds run over `ssh mac`, releases are built and signed locally per "Updater" in `WORK_PLAN.md`. Never print or commit secrets; test against `.devdata` via `TANDEM_DATA_DIR`.

@@ -1,6 +1,6 @@
 # Tandem: work plan and progress
 
-Work only in `D:\Claude-Related\ClaudeFiles_Personal\Tandem`. The `G:` shared-drive copy is an old snapshot (no source, no `WORK_PLAN.md`); ignore it. Git repo, public at https://github.com/PexefaBuilds/Tandem (branch `main`, tags v1.0.0 to v1.0.2). Push only as PexefaBuilds (see Gotchas).
+Work only in `D:\Claude-Related\ClaudeFiles_Personal\Tandem`. The `G:` shared-drive copy is an old snapshot (no source, no `WORK_PLAN.md`); ignore it. Git repo, public at https://github.com/PexefaBuilds/Tandem (branch `main`, tags v1.0.0 to v1.2.2). Push only as PexefaBuilds (see Gotchas).
 
 ## Done
 - **M0** shell, **M1** desktop profiles, **M2** sign-in and import (details in `docs/BUILD-PLAN.md`). Owner's real profiles (FS_Work, FD_Work, Personal(shahid-builds)) are in `%APPDATA%\Tandem`.
@@ -26,7 +26,11 @@ Work only in `D:\Claude-Related\ClaudeFiles_Personal\Tandem`. The `G:` shared-dr
 - History is indexed by polling (open page + every minute) instead of a file watcher: simpler, and enough for chats that change slowly.
 
 ## Current task
-M0 to M8 are built and **v1.2.0 is released** (public repo https://github.com/PexefaBuilds/Tandem; assets: Windows .exe/.msi from CI, universal Mac .dmg built by hand). Nothing is in flight. Mac code: `src-tauri/src/platform/macos.rs` plus `cfg(target_os="macos")` branches in engine, terminal, signin, usage, tray, lib. It compiles and passes `cargo test` on the Mac but has never run against the real Mac Claude/Codex apps.
+M0 to M8 are built and **v1.2.2 is released** (public repo https://github.com/PexefaBuilds/Tandem; Windows .exe/.msi and universal Mac .dmg + .app.tar.gz, all built locally and signed; `latest.json` is what the in-app updater reads). Nothing is in flight. Release notes are the same wording for Windows and Mac (no "experimental/untested" label). Mac code: `src-tauri/src/platform/macos.rs` plus `cfg(target_os="macos")` branches; compiles and passes `cargo test` on the Mac but has never run against the real Mac Claude/Codex apps.
+
+## Since 1.0.2
+- 1.1.0: Session start has two routes (`route` + `terminal` fields on `Schedule`): Claude Code `claude -p` through a signed-in `cc` profile (default; `terminal::run_prompt`, API-key env vars removed so the plan login is used), or the beta web route. Terminal option is greyed out with the reason when the CLI is missing or no cc profile is signed in. Old schedules (empty `route`) stay on web.
+- 1.2.0: in-app updater (see "Updater"). 1.2.1: Session start sheet 760px wide (`Sheet` takes `width`, scrolls), sidebar shows the real version (`getVersion`). 1.2.2: meter says "limit reached" at 100%, meter bars top-aligned so a wrapped caption doesn't shift them.
 
 ## Release history
 - 1.0.0 first release. 1.0.1: import scan runs on a thread with a hard ~14 s wait, rescans update stale "in use" state, new Refresh button (`recheck_in_use`). 1.0.2: opener permission allows only `https://github.com/PexefaBuilds/Tandem/**` (the update "Download" button was blocked), built-in icons regenerated from the dark tile (`pnpm tauri icon public/icon-dark.png`; delete the android/ios folders it makes).
@@ -34,18 +38,18 @@ M0 to M8 are built and **v1.2.0 is released** (public repo https://github.com/Pe
 ## Updater (since 1.2.0)
 `tauri-plugin-updater`; Settings "Update now" downloads, verifies, installs in place (passive NSIS) and restarts. Key: `~/.tauri/tandem-updater.key` (+ `.password`, `.pub` is in `tauri.conf.json`); never commit or print it. Local release (no CI): build Windows with `pnpm tauri build`, Mac as below, `tar` the .app (`COPYFILE_DISABLE=1`), sign the setup.exe and the .app.tar.gz with `pnpm tauri signer sign` (env `TAURI_SIGNING_PRIVATE_KEY_PATH` + `_PASSWORD`), `python scripts/make_latest_json.py <ver> <dir> <notes> PexefaBuilds/Tandem`, then `gh release create vX.Y.Z --target main` with setup.exe, .sig, msi, dmg, app.tar.gz, .sig, latest.json, and cancel the Release workflow run it triggers. Release notes are the same for Windows and Mac (no "experimental" wording).
 
-## How to release (Windows from CI, Mac by hand)
+## How to release (older CI-based route; the local route above is what 1.2.x used)
 1. Bump version in `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json`; add a `CHANGELOG.md` entry; `cargo test`, `pnpm lint`.
 2. Commit as PexefaBuilds, push, `git tag vX.Y.Z && git push origin vX.Y.Z`. The Release workflow builds Windows into a DRAFT release (~10 min). The workflow has no macOS job on purpose (GitHub's macOS runners queued 15+ min and failed).
 3. Mac (the folder there is only a synced copy, never edit it; `rm -rf` wipes its build cache, so the first build takes a few minutes): `git archive HEAD | ssh mac 'rm -rf ~/ShahidPersonalProjects/Tandem && mkdir -p ~/ShahidPersonalProjects/Tandem && cd ~/ShahidPersonalProjects/Tandem && tar xf -'`, then over ssh with `export PATH=$HOME/.local/node/bin:$HOME/.cargo/bin:$PATH`: `pnpm install --frozen-lockfile && pnpm tauri build --target universal-apple-darwin --bundles app`. `--bundles dmg` fails over ssh (needs GUI), so make the dmg with `hdiutil create -volname Tandem -srcfolder <dir with Tandem.app + Applications symlink> -format UDZO`, `scp` it back.
 4. `gh release upload vX.Y.Z <dmg>`, then `gh release edit vX.Y.Z --draft=false --latest --notes ...` (notes say Windows unsigned, Mac experimental/untested).
 
 ## Next steps
-0. This PC has Tandem 1.0.0 installed (`%LOCALAPPDATA%\Tandem`) and `src-tauri/target/release/bundle` holds only 1.0.0 installers; install 1.0.2 from the GitHub release. The owner's second PC (user `Shahid`) is where the scan/update bugs showed up.
-1. Owner tests 1.0.2 on the other PC: Refresh button, scan time, update Download button, taskbar icon (pinned vs tray if still white).
-2. Owner on a Mac: launch a profile, Keychain prompt and usage, menu-bar item, Terminal/iTerm/Ghostty, Cmd+, Settings, Dock reopen. Verify `open --env` passes Codex env vars and that Claude Code `CLAUDE_CONFIG_DIR` isolates the Keychain.
-3. Owner: `pnpm tauri signer generate` (keep the private key), then wire `tauri-plugin-updater`; Apple/SignPath signing; README screenshots.
-4. Mac gaps: desktop shortcuts are Windows-only; usage session cache on disk is Windows-only.
+1. Owner updates a PC from 1.2.1 to 1.2.2 with Settings > Check for updates > Update now: this is the first real test of the updater (installs older than 1.2.0 need one manual install).
+2. Check in the running app (not yet looked at): the wider Session start sheet at the default window size, the meter alignment with a 100% row, "limit reached" text.
+3. Verify a `claude -p` send really starts the 5-hour window (Claude Code is not installed on this PC, so the terminal route is untested end to end).
+4. Owner on a Mac: launch a profile, Keychain prompt and usage, menu-bar item, Terminal/iTerm/Ghostty, Cmd+, Settings, Dock reopen; verify `open --env` passes Codex env vars and `CLAUDE_CONFIG_DIR` isolates the Keychain.
+5. Apple/SignPath code signing, README screenshots. Mac gaps: desktop shortcuts and the usage session cache on disk are Windows-only.
 
 ## Open questions
 - Personal account plan label (Pro): confirm it shows after the capabilities fallback. If not, inspect the organization JSON (never print cookies).
@@ -60,6 +64,8 @@ M0 to M8 are built and **v1.2.0 is released** (public repo https://github.com/Pe
 - Two Personal cookie files (`Network\Cookies`, `Cookies-journal`) were not copied into the real `%APPDATA%\Tandem` (the profile was open). Copy from `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Tandem\ClaudeProfiles\Personal(shahid-builds)\Network` when it is closed (use a non-virtualized process, see gotchas). Command, run through `Invoke-CimMethod Win32_Process Create`: `robocopy "<Packages path>\Tandem" "C:\Users\_Admin\AppData\Roaming\Tandem" /E /XC /XN /XO` (copy only, never overwrites).
 
 ## Gotchas
+- **Release classifier:** a long chained `gh release create` command was once refused by the permission classifier ("Create Public Surface"); re-running after the user said retry worked. Ask the user before publishing; tell them if it is blocked.
+- **Signing key password:** it was printed once into a session transcript by a `-p` echo; regenerate the key (new release needed, pubkey changes) if the owner wants it clean.
 - **GitHub identity:** all commits and pushes must be PexefaBuilds (`PexefaBuilds <340620140+PexefaBuilds@users.noreply.github.com>`, set locally in this repo). The global git config on this PC is the owner's brother's; never use it. History was reset once to remove it. `gh` has the `delete_repo` scope now (owner can revoke).
 - Mac builds go through `ssh mac` (see How to release). Shell collapses `\` in heredocs, so use the Edit tool for Rust strings with backslashes.
 - Killing `tandem.exe` is needed before `pnpm tauri build` (exe locked); tell the owner.
