@@ -33,7 +33,7 @@ export function Meter({ r, short }: { r: UsageRow | undefined; short: string }) 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <div className="track" role="img" aria-label={`${pct}% of the ${short} limit used`}><div className={hot ? "fill hot" : "fill"} style={{ width: `${pct}%` }} /></div>
-      <span className="num" style={{ fontSize: 12, color: "var(--muted)" }}><span style={{ fontWeight: 500, color: hot ? "var(--negative)" : "var(--text)" }}>{pct}%{hot ? " near limit" : ""}</span> · resets {fmtReset(r.resetsAt)}</span>
+      <span className="num" style={{ fontSize: 12, color: "var(--muted)" }}><span style={{ fontWeight: 500, color: hot ? "var(--negative)" : "var(--text)" }}>{pct}%{pct >= 100 ? " limit reached" : hot ? " near limit" : ""}</span> · resets {fmtReset(r.resetsAt)}</span>
     </div>
   );
 }
