@@ -27,8 +27,9 @@ export function TopBar({ onRefresh, updated, busy }: { onRefresh: () => void; up
   useEffect(() => { const t = window.setInterval(() => tick((n) => n + 1), 30000); return () => window.clearInterval(t); }, []);
   return (
     <div data-tauri-drag-region style={{ height: 48, flex: "none", display: "flex", alignItems: "center", gap: 12 }}>
-      <div style={{ flexGrow: 1 }} />
-      <span style={{ fontSize: 12, color: "var(--muted)" }}>{ago(updated, busy)}</span>
+      {/* Tauri drags only when the clicked element itself has the attribute, so the children need it too. */}
+      <div data-tauri-drag-region style={{ flexGrow: 1, height: "100%" }} />
+      <span data-tauri-drag-region style={{ fontSize: 12, color: "var(--muted)" }}>{ago(updated, busy)}</span>
       <button className="icon-btn" aria-label="Refresh usage" disabled={busy} onClick={onRefresh}>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" /><path d="M13.5 2.5v3h-3" /></svg>
       </button>

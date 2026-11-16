@@ -286,7 +286,7 @@ fn plan_of(org: &Value) -> String {
     }
     let tier = org["rate_limit_tier"].as_str().unwrap_or("").to_lowercase();
     match () {
-        _ if tier.contains("max_20x") => "Max 20x",
+        _ if tier.contains("ultra") || tier.contains("max_20x") => "Ultra",
         _ if tier.contains("max_5x") => "Max 5x",
         _ if tier.contains("max") => "Max",
         _ if tier.contains("pro") => "Pro",
