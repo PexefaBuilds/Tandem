@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.3
+- Fix: usage refresh no longer reports "offline" on work networks that inspect HTTPS traffic; Tandem now trusts the Windows and macOS certificate store.
+- Fix: the top bar can be dragged to move the window.
+- Change: the top Claude plan (formerly Max 20x) is labelled "Ultra".
+
 ## 1.2.2
 - Fix: a usage meter at 100% now says "limit reached" instead of "near limit".
 - Fix: a meter whose caption wraps to two lines no longer sits out of line with the other bars.
