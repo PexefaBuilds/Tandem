@@ -43,6 +43,8 @@ pub struct Usage {
 enum Fail {
     Expired,
     Locked,
+    /// The profile is open, so only an old cached login was available and Cloudflare refused it.
+    Stale,
     NotSignedIn,
     Offline,
     Blocked,
@@ -55,6 +57,7 @@ impl Fail {
         match self {
             Fail::Expired => ("expired", "Session expired".into()),
             Fail::Locked => ("locked", "Open it once to refresh".into()),
+            Fail::Stale => ("locked", "Close the profile once, then refresh".into()),
             Fail::NotSignedIn => ("expired", "Not signed in".into()),
             Fail::Offline => ("offline", "Network unavailable".into()),
             Fail::Blocked => ("blocked", "Blocked by Cloudflare".into()),
@@ -314,36 +317,40 @@ fn claude_rows(d: &Value) -> Vec<Row> {
 }
 
 /// The Cookie header for a Claude profile: read from its cookie file, or the cached copy while the profile is open.
-async fn claude_cookie(k: &str, folder: &Path) -> Result<String, Fail> {
+async fn claude_cookie(k: &str, folder: &Path) -> Result<(String, bool), Fail> {
     let f = folder.to_path_buf();
     let session = tauri::async_runtime::spawn_blocking(move || read_session(&f)).await.map_err(|_| Fail::Locked)?;
-    let (sk, cf) = match session {
+    let (sk, cf, cached) = match session {
         Session::Live(s, cf) => {
             // Cached as "sessionKey\ncf_clearance": Cloudflare blocks the key alone while the profile is open.
             cache_put(k, &format!("{s}\n{}", cf.as_deref().unwrap_or("")));
-            (s, cf)
+            (s, cf, false)
         }
         other => {
             let c = cache_get(k).ok_or(if matches!(other, Session::Locked) { Fail::Locked } else { Fail::NotSignedIn })?;
             let (s, cf) = c.split_once('\n').unwrap_or((&c, ""));
-            (s.to_string(), (!cf.is_empty()).then(|| cf.to_string()))
+            (s.to_string(), (!cf.is_empty()).then(|| cf.to_string()), true)
         }
     };
     let cookie = match cf {
         Some(cf) => format!("sessionKey={sk}; cf_clearance={cf}"),
         None => format!("sessionKey={sk}"),
     };
-    Ok(cookie)
+    Ok((cookie, cached))
 }
 
 async fn fetch_claude(c: &reqwest::Client, k: &str, folder: &Path) -> Result<Got, Fail> {
-    let cookie = claude_cookie(k, folder).await?;
+    let (cookie, cached) = claude_cookie(k, folder).await?;
     let req = |r: reqwest::RequestBuilder| r.header("Cookie", cookie.clone()).header("Referer", "https://claude.ai/");
     let orgs = get_json(c, "https://claude.ai/api/organizations", req, Fail::Expired).await;
     if matches!(orgs, Err(Fail::Expired)) {
         cache_drop(k);
     }
-    let orgs = orgs?;
+    // A cached login that Cloudflare refuses is stale: say what fixes it instead of blaming Cloudflare.
+    let orgs = match orgs {
+        Err(Fail::Blocked) if cached => return Err(Fail::Stale),
+        o => o?,
+    };
     let org = pick_org(orgs.as_array().map(Vec::as_slice).unwrap_or(&[])).ok_or_else(|| Fail::Other("No organization".into()))?;
     let id = org["uuid"].as_str().or(org["id"].as_str()).ok_or_else(|| Fail::Other("No organization".into()))?;
     let data = get_json(c, &format!("https://claude.ai/api/organizations/{id}/usage"), req, Fail::Expired).await?;
@@ -566,7 +573,7 @@ pub fn client() -> Option<reqwest::Client> {
 
 /// (Cookie header, organization id) for a Claude profile. Errors are fixed, user-facing text.
 pub async fn claude_login(c: &reqwest::Client, app: &str, folder_name: &str, folder: &Path) -> Result<(String, String), String> {
-    let cookie = claude_cookie(&key(app, folder_name), folder).await.map_err(|f| f.parts().1)?;
+    let (cookie, _) = claude_cookie(&key(app, folder_name), folder).await.map_err(|f| f.parts().1)?;
     let req = |r: reqwest::RequestBuilder| r.header("Cookie", cookie.clone()).header("Referer", "https://claude.ai/");
     let orgs = get_json(c, "https://claude.ai/api/organizations", req, Fail::Expired).await.map_err(|f| f.parts().1)?;
     let org = pick_org(orgs.as_array().map(Vec::as_slice).unwrap_or(&[])).ok_or("No organization found")?;

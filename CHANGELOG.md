@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.5
+- Change: a profile that is open in Claude and can't be read now says "Close the profile once, then refresh" instead of "Blocked by Cloudflare".
+
 ## 1.2.4
 - Fix: Tandem no longer starts PowerShell processes over and over on Windows (it pushed the CPU to 95-99% and flashed console windows). Running apps are now detected inside Tandem itself, in one check, one at a time.
 - Change: status checks run every 4 s while the window is visible, pause while it is hidden, and slow down when nothing changes.
