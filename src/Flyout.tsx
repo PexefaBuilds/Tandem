@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api, APP_LABEL, errText, initial, type Group, type State, type Usage } from "./api";
 import { Meter, windows } from "./Profiles";
+import { usePoll } from "./poll";
 
 /** The tray launcher: a small window that opens above the tray icon. */
 export function Flyout() {
@@ -11,17 +12,15 @@ export function Flyout() {
   const [q, setQ] = useState("");
   const [msg, setMsg] = useState("");
   const load = useCallback(() => {
-    api.state().then(setState).catch(() => {});
-    api.usageSnapshot().then(setUsage).catch(() => {});
-    api.groups().then(setGroups).catch(() => {});
+    const ok = <T,>(p: Promise<T>, set: (v: T) => void) => p.then((v) => { set(v); return JSON.stringify(v); }).catch(() => "");
+    return Promise.all([ok(api.state(), setState), ok(api.usageSnapshot(), setUsage), ok(api.groups(), setGroups)]).then((r) => r.join("|"));
   }, []);
+  usePoll(load);
   useEffect(() => {
-    load();
     const un = listen("flyout-shown", () => { setQ(""); setMsg(""); load(); });
     const esc = (e: KeyboardEvent) => e.key === "Escape" && api.hideFlyout();
     document.addEventListener("keydown", esc);
-    const poll = window.setInterval(() => document.visibilityState === "visible" && load(), 3000);
-    return () => { window.clearInterval(poll); un.then((f) => f()); document.removeEventListener("keydown", esc); };
+    return () => { un.then((f) => f()); document.removeEventListener("keydown", esc); };
   }, [load]);
 
   const run = (p: Promise<unknown>) => p.then(() => api.hideFlyout()).catch((e) => setMsg(errText(e)));

@@ -64,20 +64,50 @@ fn hide(cmd: &mut Command) -> &mut Command {
     cmd
 }
 
-fn powershell(script: &str) -> String {
+/// Runs a script with no window and a 20 s limit; a script that overruns is killed and reaped.
+pub fn powershell(script: &str) -> String {
+    use std::io::Read;
     let mut c = Command::new("powershell");
-    c.args(["-NoProfile", "-Command", script]).stdin(Stdio::null());
+    c.args(["-NoProfile", "-NonInteractive", "-Command", script]).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null());
     hide(&mut c);
-    c.output().map(|o| String::from_utf8_lossy(&o.stdout).into_owned()).unwrap_or_default()
+    let Ok(mut child) = c.spawn() else { return String::new() };
+    let Some(mut out) = child.stdout.take() else {
+        let _ = child.kill();
+        let _ = child.wait();
+        return String::new();
+    };
+    let reader = std::thread::spawn(move || {
+        let mut buf = Vec::new();
+        let _ = out.read_to_end(&mut buf);
+        buf
+    });
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(20);
+    loop {
+        match child.try_wait() {
+            Ok(Some(_)) => break,
+            Ok(None) if std::time::Instant::now() < deadline => std::thread::sleep(std::time::Duration::from_millis(50)),
+            _ => {
+                let _ = child.kill();
+                let _ = child.wait();
+                break;
+            }
+        }
+    }
+    String::from_utf8_lossy(&reader.join().unwrap_or_default()).into_owned()
 }
 
-/// The MSIX path changes on every update, so resolve it each time and never store it.
+/// The MSIX path changes on every update, so it is resolved lazily and never stored on disk.
 pub fn find_exe(app: &App) -> Option<PathBuf> {
     static CACHE: std::sync::Mutex<Vec<(&str, std::time::Instant, Option<PathBuf>)>> = std::sync::Mutex::new(Vec::new());
     let mut cache = CACHE.lock().unwrap_or_else(|e| e.into_inner());
-    // 30 s: the status poll runs every 3 s and Get-AppxPackage is slow.
+    // A found path stays valid until the file is gone (an MSIX update moves it), so the slow
+    // Get-AppxPackage runs only on a miss; a "not installed" answer is retried after 60 s.
     if let Some((_, at, v)) = cache.iter().find(|(k, _, _)| *k == app.key) {
-        if at.elapsed().as_secs() < 30 {
+        let fresh = match v {
+            Some(p) => p.is_file(),
+            None => at.elapsed().as_secs() < 60,
+        };
+        if fresh {
             return v.clone();
         }
     }
@@ -124,12 +154,14 @@ fn msix_version(exe: &Path) -> String {
         .to_string()
 }
 
+#[derive(Clone)]
 pub struct Proc {
     pub pid: u32,
     pub exe: String,
     pub cmd: String,
 }
 
+#[cfg(test)]
 pub fn parse_processes(out: &str) -> Vec<Proc> {
     out.lines()
         .filter_map(|l| {
@@ -143,13 +175,100 @@ pub fn parse_processes(out: &str) -> Vec<Proc> {
 pub fn processes(app: &App) -> Vec<Proc> {
     #[cfg(target_os = "macos")]
     return crate::platform::macos::processes(app.mac_bundle);
-    if !cfg!(windows) {
-        return vec![];
+    #[cfg(windows)]
+    return snapshot::named(app.exe_name);
+    #[cfg(not(windows))]
+    vec![]
+}
+
+/// The next `processes` call re-reads the process table (after a launch or kill changed it).
+fn invalidate() {
+    #[cfg(windows)]
+    snapshot::invalidate();
+}
+
+/// One in-process view of the process table, shared by every caller, so detecting running apps starts no child
+/// process. The mutex serialises callers, so checks never overlap; a result under 2 s old is reused.
+#[cfg(windows)]
+mod snapshot {
+    use super::Proc;
+    use std::sync::{LazyLock, Mutex, MutexGuard};
+    use std::time::{Duration, Instant};
+    use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind};
+
+    const MAX_AGE: Duration = Duration::from_secs(2);
+    /// Only these are kept with their command line; the rest of the table is used just for parent links.
+    const APP_EXES: [&str; 2] = [super::CLAUDE.exe_name, super::CODEX.exe_name];
+
+    struct Snap {
+        sys: System,
+        at: Option<Instant>,
+        /// (lower-case exe name, process)
+        procs: Vec<(String, Proc)>,
     }
-    parse_processes(&powershell(&format!(
-        "Get-CimInstance Win32_Process -Filter \"Name='{}'\" | ForEach-Object {{ \"$($_.ProcessId)|$($_.ExecutablePath)|$($_.CommandLine)\" }}",
-        app.exe_name
-    )))
+
+    static SNAP: LazyLock<Mutex<Snap>> = LazyLock::new(|| Mutex::new(Snap { sys: System::new(), at: None, procs: vec![] }));
+
+    /// Quote an argument that holds spaces the way a Windows command line shows it (`--flag="a b"`).
+    fn quoted(a: &str) -> String {
+        match a.split_once('=') {
+            Some((flag, v)) if a.contains(' ') && flag.starts_with("--") => format!("{flag}=\"{v}\""),
+            _ if a.contains(' ') => format!("\"{a}\""),
+            _ => a.to_string(),
+        }
+    }
+
+    fn fresh() -> MutexGuard<'static, Snap> {
+        let mut s = SNAP.lock().unwrap_or_else(|e| e.into_inner());
+        if s.at.is_some_and(|t| t.elapsed() < MAX_AGE) {
+            return s;
+        }
+        let kind = ProcessRefreshKind::nothing().with_exe(UpdateKind::OnlyIfNotSet).with_cmd(UpdateKind::OnlyIfNotSet);
+        s.sys.refresh_processes_specifics(ProcessesToUpdate::All, true, kind);
+        let procs = s
+            .sys
+            .processes()
+            .iter()
+            .filter_map(|(pid, p)| {
+                let name = p.name().to_string_lossy().to_lowercase();
+                APP_EXES.iter().any(|n| n.eq_ignore_ascii_case(&name)).then(|| {
+                    let proc = Proc {
+                        pid: pid.as_u32(),
+                        exe: p.exe().map(|e| e.display().to_string()).unwrap_or_default(),
+                        cmd: p.cmd().iter().map(|a| quoted(&a.to_string_lossy())).collect::<Vec<_>>().join(" "),
+                    };
+                    (name, proc)
+                })
+            })
+            .collect();
+        s.procs = procs;
+        s.at = Some(Instant::now());
+        s
+    }
+
+    pub fn named(exe_name: &str) -> Vec<Proc> {
+        let s = fresh();
+        s.procs.iter().filter(|(n, _)| n.eq_ignore_ascii_case(exe_name)).map(|(_, p)| p.clone()).collect()
+    }
+
+    pub fn invalidate() {
+        SNAP.lock().unwrap_or_else(|e| e.into_inner()).at = None;
+    }
+
+    /// This process's parents, nearest first.
+    pub fn ancestors() -> Vec<u32> {
+        let s = fresh();
+        let mut out = vec![];
+        let mut pid = Pid::from_u32(std::process::id());
+        while let Some(parent) = s.sys.process(pid).and_then(|p| p.parent()) {
+            if out.len() > 64 || out.contains(&parent.as_u32()) {
+                break;
+            }
+            out.push(parent.as_u32());
+            pid = parent;
+        }
+        out
+    }
 }
 
 /// The value of `--user-data-dir=`, quoted or not.
@@ -257,7 +376,9 @@ pub fn launch(app: &App, folder: &Path) -> Result<(), String> {
         c
     };
     detach(&mut c);
-    c.spawn().map(|_| ()).map_err(|e| e.to_string())
+    let r = c.spawn().map(|_| ()).map_err(|e| e.to_string());
+    invalidate();
+    r
 }
 
 pub fn launch_main(app: &App) -> Result<(), String> {
@@ -271,7 +392,9 @@ pub fn launch_main(app: &App) -> Result<(), String> {
     #[cfg(not(target_os = "macos"))]
     let mut c = Command::new(exe);
     detach(&mut c);
-    c.spawn().map(|_| ()).map_err(|e| e.to_string())
+    let r = c.spawn().map(|_| ()).map_err(|e| e.to_string());
+    invalidate();
+    r
 }
 
 fn detach(c: &mut Command) {
@@ -287,16 +410,10 @@ fn detach(c: &mut Command) {
 fn my_ancestors() -> Vec<u32> {
     #[cfg(target_os = "macos")]
     return crate::platform::macos::ancestors();
-    if !cfg!(windows) {
-        return vec![];
-    }
-    powershell(&format!(
-        "$p={}; while($p){{ $p=(Get-CimInstance Win32_Process -Filter \"ProcessId=$p\").ParentProcessId; if($p){{$p}} }}",
-        std::process::id()
-    ))
-    .lines()
-    .filter_map(|l| l.trim().parse().ok())
-    .collect()
+    #[cfg(windows)]
+    return snapshot::ancestors();
+    #[cfg(not(windows))]
+    vec![]
 }
 
 /// Force kill with the process tree; there is no graceful close. Tandem's own ancestors are killed without /T.
@@ -304,7 +421,8 @@ pub fn kill_pids(pids: &[u32]) -> usize {
     let mine = my_ancestors();
     #[cfg(target_os = "macos")]
     return pids.iter().filter(|pid| Command::new("kill").args(["-9", &pid.to_string()]).stdout(Stdio::null()).stderr(Stdio::null()).status().is_ok_and(|s| s.success())).count();
-    pids.iter()
+    let killed = pids
+        .iter()
         .filter(|pid| {
             let mut c = Command::new("taskkill");
             c.args(["/PID", &pid.to_string()]);
@@ -315,7 +433,9 @@ pub fn kill_pids(pids: &[u32]) -> usize {
             hide(&mut c);
             c.status().map(|s| s.success()).unwrap_or(false)
         })
-        .count()
+        .count();
+    invalidate();
+    killed
 }
 
 /// Retry every 0.5 s for up to 15 s: file locks linger after a kill. Clears the read-only bit (Git pack files).
@@ -358,6 +478,26 @@ fn clear_readonly(path: &Path) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Reads the live process table (read-only): every running Claude process must come back with its exe, and a
+    /// `--user-data-dir` must parse to the same folder as the real command line.
+    #[cfg(windows)]
+    #[test]
+    fn in_process_listing_matches_wmi() {
+        let ours = processes(&CLAUDE);
+        let wmi = parse_processes(&powershell("Get-CimInstance Win32_Process -Filter \"Name='claude.exe'\" | ForEach-Object { \"$($_.ProcessId)|$($_.ExecutablePath)|$($_.CommandLine)\" }"));
+        for w in wmi.iter().filter(|w| !w.cmd.is_empty()) {
+            // A process may have exited between the two reads.
+            let Some(o) = ours.iter().find(|o| o.pid == w.pid) else { continue };
+            // Names only: inside the MSIX-virtualised Claude app the two readers can show different %APPDATA% roots.
+            let name = |e: &str| Path::new(e).file_name().map(|n| n.to_string_lossy().to_lowercase());
+            assert_eq!(name(&o.exe), name(&w.exe), "exe of {}", w.pid);
+            assert_eq!(user_data_dir(&o.cmd).map(|d| d.to_lowercase()), user_data_dir(&w.cmd).map(|d| d.to_lowercase()), "user-data-dir of {}", w.pid);
+            assert_eq!(is_packaged_exe(&o.exe, &CLAUDE), is_packaged_exe(&w.exe, &CLAUDE));
+        }
+        assert!(!ours.is_empty() || wmi.is_empty());
+        assert!(!my_ancestors().is_empty());
+    }
 
     const PKG: &str = r"C:\Program Files\WindowsApps\Claude_3.6.2.0_x64__pzs8sxrjxfjjc\app\Claude.exe";
 

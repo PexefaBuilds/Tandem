@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.4
+- Fix: Tandem no longer starts PowerShell processes over and over on Windows (it pushed the CPU to 95-99% and flashed console windows). Running apps are now detected inside Tandem itself, in one check, one at a time.
+- Change: status checks run every 4 s while the window is visible, pause while it is hidden, and slow down when nothing changes.
+
 ## 1.2.3
 - Fix: usage refresh no longer reports "offline" on work networks that inspect HTTPS traffic; Tandem now trusts the Windows and macOS certificate store.
 - Fix: the top bar can be dragged to move the window.

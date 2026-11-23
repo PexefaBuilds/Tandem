@@ -1,14 +1,11 @@
 //! Desktop shortcuts (.lnk) that run `Tandem.exe --launch <app> <profile>`.
 use crate::engine::App;
 use std::path::PathBuf;
-use std::process::{Command, Stdio};
 
 #[cfg(windows)]
 fn desktop() -> Option<PathBuf> {
-    use std::os::windows::process::CommandExt;
     // The Desktop can be redirected (OneDrive), so ask Windows rather than guessing.
-    let out = Command::new("powershell").args(["-NoProfile", "-Command", "[Environment]::GetFolderPath('Desktop')"]).creation_flags(0x0800_0000).stdin(Stdio::null()).output().ok()?;
-    let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
+    let s = crate::engine::powershell("[Environment]::GetFolderPath('Desktop')").trim().to_string();
     (!s.is_empty()).then(|| s.into())
 }
 #[cfg(not(windows))]
@@ -45,9 +42,8 @@ pub fn create(app: &App, name: &str) -> Result<(), String> {
     );
     #[cfg(windows)]
     {
-        use std::os::windows::process::CommandExt;
-        let ok = Command::new("powershell").args(["-NoProfile", "-Command", &script]).creation_flags(0x0800_0000).stdin(Stdio::null()).status().map(|s| s.success()).unwrap_or(false);
-        return if ok && f.exists() { Ok(()) } else { Err("Couldn't create the shortcut.".into()) };
+        crate::engine::powershell(&script);
+        return if f.exists() { Ok(()) } else { Err("Couldn't create the shortcut.".into()) };
     }
     #[cfg(not(windows))]
     {

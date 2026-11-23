@@ -16,6 +16,7 @@ import { SessionStart } from "./SessionStart";
 import { History } from "./History";
 import { TerminalSignIn, Terminals } from "./Terminals";
 import { Recover, SignIn } from "./SignIn";
+import { usePoll } from "./poll";
 
 type SheetState = { kind: "signin"; p: Profile } | { kind: "recover" } | { kind: "import" } | { kind: "new"; app: AppKey } | { kind: "edit"; p: Profile } | { kind: "delete"; p: Profile } | { kind: "session"; p: Profile } | { kind: "tsignin"; p: Profile } | null;
 
@@ -49,21 +50,18 @@ export default function App() {
   }, [minutes, refreshUsage]);
 
   const reload = useCallback(() => {
-    api.state().then((s) => {
+    api.groups().then(setGroups).catch(() => {});
+    return api.state().then((s) => {
       setState(s);
       setError("");
       // A profile that just closed has released its cookie file, so read its usage now.
       const now = new Set(s.profiles.filter((p) => p.running).map((p) => p.app + "/" + p.name));
       if ([...wasRunning.current].some((k) => !now.has(k))) refreshUsage();
       wasRunning.current = now;
-    }).catch((e) => setError(errText(e)));
-    api.groups().then(setGroups).catch(() => {});
+      return JSON.stringify(s);
+    }).catch((e) => { setError(errText(e)); return ""; });
   }, [refreshUsage]);
-  useEffect(() => {
-    reload();
-    const t = window.setInterval(reload, 3000); // running status
-    return () => window.clearInterval(t);
-  }, [reload]);
+  usePoll(reload); // running status
 
   useEffect(() => {
     const un = listen<string>("navigate", (e) => setRoute(e.payload as Route));
